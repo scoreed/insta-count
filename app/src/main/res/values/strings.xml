@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">InstaCount</string>
+    <string name="title_section1">Gallery</string>
+    <string name="title_section2">Camera</string>
+    <string name="title_section3">Profiles</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
+
+    <string name="default_min_distance">30</string>
+    <string name="default_canny_threshold">32</string>
+    <string name="default_accumulator_threshold">47</string>
+    <string name="default_min_radius">10</string>
+    <string name="default_max_radius">40</string>
+
+</resources>

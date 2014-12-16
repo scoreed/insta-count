@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="red_transparent">#66FF0000</color>
+    <color name="grey_transparent">#33D8D8D8</color>
+	
+	<color name="material_indigo_500">#3F51B5</color>
+    <color name="material_indigo_600">#3949AB</color>
+    <color name="material_pink_500">#E91E63</color>
+    <color name="material_red_400">#EF5350</color>
+	
+</resources>
