@@ -10,10 +10,10 @@
     <string name="action_settings">Settings</string>
     <string name="action_logout">Logout</string>
 
-    <string name="default_min_distance">30</string>
-    <string name="default_canny_threshold">32</string>
-    <string name="default_accumulator_threshold">47</string>
-    <string name="default_min_radius">10</string>
-    <string name="default_max_radius">40</string>
+    <string name="default_min_distance">80</string>
+    <string name="default_canny_threshold">80</string>
+    <string name="default_accumulator_threshold">15</string>
+    <string name="default_min_radius">80</string>
+    <string name="default_max_radius">100</string>
 
 </resources>

@@ -157,9 +157,13 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
 
                     tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
 
-                    bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
-                    img.setImageBitmap(bmp32);
+                    try {
+                        bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
+                        img.setImageBitmap(bmp32);
+                    } catch (Exception e) {
+                        Log.e(TAG, "onImageChosen: Exception = " + e.getMessage());
+                    }
                 }
             }
         });
