@@ -1,72 +1,69 @@
 package us.lucidian.instacount;
 
-import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+@SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
+public class SettingsFragment extends Fragment {
+    private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String TAG = "InstaCount::SettingsFragment";
+    private int      mSectionNumber;
 
-public class ParamAdjustDialog extends DialogFragment {
-    private static final String TAG = "InstaCount::ParamAdjustDialog";
+    public View settingsView;
 
-    public static MaterialDialog md;
-    public        TextView       min_distance_tv;
-    public        TextView       min_radius_tv;
-    public        TextView       max_radius_tv;
-    public        TextView       canny_threshold_tv;
-    public        TextView       accumulator_threshold_tv;
-    public        SeekBar        min_distance_seek_bar;
-    public        SeekBar        min_radius_seek_bar;
-    public        SeekBar        max_radius_seek_bar;
-    public        SeekBar        canny_threshold_seek_bar;
-    public        SeekBar        accumulator_threshold_seek_bar;
+    public  TextView min_distance_tv;
+    public  TextView min_radius_tv;
+    public  TextView max_radius_tv;
+    public  TextView canny_threshold_tv;
+    public  TextView accumulator_threshold_tv;
+    public  SeekBar  min_distance_seek_bar;
+    public  SeekBar  min_radius_seek_bar;
+    public  SeekBar  max_radius_seek_bar;
+    public  SeekBar  canny_threshold_seek_bar;
+    public  SeekBar  accumulator_threshold_seek_bar;
 
-    public ParamAdjustDialog() { }
+    public SettingsFragment() { }
 
-    @NonNull
+    public static SettingsFragment newInstance(int sectionNumber) {
+        SettingsFragment fragment = new SettingsFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        md = new MaterialDialog.Builder(getActivity()).title("Circle Detection Parameters")
-                                                      .autoDismiss(false)
-                                                      .customView(R.layout.dialog_param_adjust)
-                                                      .negativeText("Cancel")
-                                                      .neutralText("Reset to Defaults")
-                                                      .positiveText("Ok")
-                                                      .callback(new MaterialDialog.FullCallback() {
-                                                          @Override
-                                                          public void onPositive(MaterialDialog materialDialog) {
-                                                              saveSharedPreferences();
-                                                              Toast.makeText(getActivity(), "Settings Saved!", Toast.LENGTH_SHORT).show();
-                                                              materialDialog.dismiss();
-                                                          }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mSectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
+        }
+    }
 
-                                                          @Override
-                                                          public void onNegative(MaterialDialog materialDialog) {
-                                                              materialDialog.dismiss();
-                                                          }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        settingsView = inflater.inflate(R.layout.fragment_settings, container, false);
 
-                                                          @Override
-                                                          public void onNeutral(MaterialDialog materialDialog) { resetSharedPreferences(); }
-                                                      })
-                                                      .build();
+        min_distance_tv = (TextView) settingsView.findViewById(R.id.min_distance_tv);
+        min_radius_tv = (TextView) settingsView.findViewById(R.id.min_radius_tv);
+        max_radius_tv = (TextView) settingsView.findViewById(R.id.max_radius_tv);
+        canny_threshold_tv = (TextView) settingsView.findViewById(R.id.canny_threshold_tv);
+        accumulator_threshold_tv = (TextView) settingsView.findViewById(R.id.accumulator_threshold_tv);
 
-        min_distance_tv = (TextView) md.getCustomView().findViewById(R.id.min_distance_tv);
-        min_radius_tv = (TextView) md.getCustomView().findViewById(R.id.min_radius_tv);
-        max_radius_tv = (TextView) md.getCustomView().findViewById(R.id.max_radius_tv);
-        canny_threshold_tv = (TextView) md.getCustomView().findViewById(R.id.canny_threshold_tv);
-        accumulator_threshold_tv = (TextView) md.getCustomView().findViewById(R.id.accumulator_threshold_tv);
-
-        min_distance_seek_bar = (SeekBar) md.getCustomView().findViewById(R.id.min_distance_seek_bar);
-        min_radius_seek_bar = (SeekBar) md.getCustomView().findViewById(R.id.min_radius_seek_bar);
-        max_radius_seek_bar = (SeekBar) md.getCustomView().findViewById(R.id.max_radius_seek_bar);
-        canny_threshold_seek_bar = (SeekBar) md.getCustomView().findViewById(R.id.canny_threshold_seek_bar);
-        accumulator_threshold_seek_bar = (SeekBar) md.getCustomView().findViewById(R.id.accumulator_threshold_seek_bar);
+        min_distance_seek_bar = (SeekBar) settingsView.findViewById(R.id.min_distance_seek_bar);
+        min_radius_seek_bar = (SeekBar) settingsView.findViewById(R.id.min_radius_seek_bar);
+        max_radius_seek_bar = (SeekBar) settingsView.findViewById(R.id.max_radius_seek_bar);
+        canny_threshold_seek_bar = (SeekBar) settingsView.findViewById(R.id.canny_threshold_seek_bar);
+        accumulator_threshold_seek_bar = (SeekBar) settingsView.findViewById(R.id.accumulator_threshold_seek_bar);
 
         min_distance_seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -129,9 +126,25 @@ public class ParamAdjustDialog extends DialogFragment {
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
+        settingsView.findViewById(R.id.btn_settings_save).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveSharedPreferences();
+                Toast.makeText(getActivity(), "Settings Saved!", Toast.LENGTH_SHORT).show();
+                loadSharedPreferences();
+            }
+        });
+
+        settingsView.findViewById(R.id.btn_settings_reset).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetSharedPreferences();
+            }
+        });
+
         loadSharedPreferences();
 
-        return md;
+        return settingsView;
     }
 
     public void loadSharedPreferences() {

@@ -7,15 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-public class PreferencesFragment extends Fragment {
+public class ProfileFragment extends Fragment {
     private static final String ARG_SECTION_NUMBER = "section_number";
     private int mSectionNumber;
 
-    public PreferencesFragment() {
+    public ProfileFragment() {
     }
 
-    public static PreferencesFragment newInstance(int sectionNumber) {
-        PreferencesFragment fragment = new PreferencesFragment();
+    public static ProfileFragment newInstance(int sectionNumber) {
+        ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);

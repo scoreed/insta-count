@@ -17,7 +17,8 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
 
     private LoadFromGalleryFragment loadFromGalleryFragment = LoadFromGalleryFragment.newInstance(1);
     private LoadFromCameraFragment  loadFromCameraFragment  = LoadFromCameraFragment.newInstance(1);
-    private PreferencesFragment     preferencesFragment     = PreferencesFragment.newInstance(1);
+    private ProfileFragment         preferencesFragment     = ProfileFragment.newInstance(1);
+    private SettingsFragment        settingsFragment        = SettingsFragment.newInstance(1);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,10 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
                 mTitle = getString(R.string.title_section3);
                 fragmentManager.beginTransaction().replace(R.id.container, preferencesFragment).commit();
                 break;
+            case 3:
+                mTitle = getString(R.string.title_section4);
+                fragmentManager.beginTransaction().replace(R.id.container, settingsFragment).commit();
+                break;
         }
     }
 
@@ -71,14 +76,7 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
         if (id == R.id.action_logout) {
             finish();
         }
-        else if (id == R.id.action_settings) {
-            showParamAdjustDialog();
-        }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void showParamAdjustDialog() {
-        new ParamAdjustDialog().show(getSupportFragmentManager(), "Settings");
     }
 
     @Override
