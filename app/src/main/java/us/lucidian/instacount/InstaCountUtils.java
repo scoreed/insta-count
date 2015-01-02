@@ -58,7 +58,7 @@ public class InstaCountUtils {
         Mat smoothedGray = new Mat();
         Mat circles = new Mat();
 
-        Imgproc.GaussianBlur(mGray, smoothedGray, new Size(5,5), 2, 2);
+        Imgproc.GaussianBlur(mGray, smoothedGray, new Size(5,5), 20, 20);
         Imgproc.HoughCircles(smoothedGray, circles, Imgproc.CV_HOUGH_GRADIENT, 1, minDistance, cannyThreshold, accumulatorThreshold, minRadius, maxRadius);
 
         mCircleCount = circles.cols() > 50 ? 50 : circles.cols();

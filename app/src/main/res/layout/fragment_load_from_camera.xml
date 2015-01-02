@@ -23,6 +23,16 @@
         android:layout_below="@+id/tv_circle_count"
         android:layout_above="@+id/footer"/>
 
+    <ImageView
+        android:id="@+id/ImageView01"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/tv_circle_count"
+        android:layout_above="@+id/footer"
+        android:background="@drawable/image_placeholder"
+        android:visibility="gone">
+    </ImageView>
+
     <LinearLayout
         android:id="@+id/footer"
         style="?android:attr/buttonBarStyle"
@@ -30,14 +40,20 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
-
         <Button
-            android:id="@+id/btn_reset_image"
+            android:id="@+id/btn_camera_view"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Reset Image"/>
+            android:text="Camera"/>
+        <Button
+            android:id="@+id/btn_canny"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Canny"/>
 
         <Button
             android:id="@+id/btn_detect_circles"

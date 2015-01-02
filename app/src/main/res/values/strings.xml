@@ -10,10 +10,10 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_logout">Exit</string>
 
-    <string name="default_min_distance">80</string>
-    <string name="default_canny_threshold">80</string>
-    <string name="default_accumulator_threshold">15</string>
-    <string name="default_min_radius">80</string>
-    <string name="default_max_radius">100</string>
+    <string name="default_min_distance">40</string>
+    <string name="default_min_radius">40</string>
+    <string name="default_max_radius">80</string>
+    <string name="default_canny_threshold">40</string>
+    <string name="default_accumulator_threshold">20</string>
 
 </resources>

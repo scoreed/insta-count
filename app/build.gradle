@@ -15,8 +15,8 @@ android {
         applicationId "us.lucidian.instacount"
         minSdkVersion 12
         targetSdkVersion 21
-        versionCode 8
-        versionName "0.0.8"
+        versionCode 10
+        versionName "0.1.0"
         signingConfig signingConfigs.config
     }
     buildTypes {
