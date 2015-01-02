@@ -1,5 +1,6 @@
 package us.lucidian.instacount;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -17,7 +18,6 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
 
     private LoadFromGalleryFragment loadFromGalleryFragment = LoadFromGalleryFragment.newInstance(1);
     private LoadFromCameraFragment  loadFromCameraFragment  = LoadFromCameraFragment.newInstance(1);
-    private ProfileFragment         preferencesFragment     = ProfileFragment.newInstance(1);
     private SettingsFragment        settingsFragment        = SettingsFragment.newInstance(1);
 
     @Override
@@ -44,7 +44,8 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
                 break;
             case 2:
                 mTitle = getString(R.string.title_section3);
-                fragmentManager.beginTransaction().replace(R.id.container, preferencesFragment).commit();
+                Intent myIntent = new Intent(InstaCountMainActivity.this, CameraRTDetectFragment.class);
+                InstaCountMainActivity.this.startActivity(myIntent);
                 break;
             case 3:
                 mTitle = getString(R.string.title_section4);

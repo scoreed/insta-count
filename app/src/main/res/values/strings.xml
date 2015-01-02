@@ -4,16 +4,29 @@
     <string name="app_name">InstaCount</string>
     <string name="title_section1">Gallery</string>
     <string name="title_section2">Camera</string>
-    <string name="title_section3">Profiles</string>
+    <string name="title_section3">Camera Real-Time</string>
     <string name="title_section4">Settings</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_logout">Exit</string>
 
-    <string name="default_min_distance">40</string>
-    <string name="default_min_radius">40</string>
-    <string name="default_max_radius">80</string>
-    <string name="default_canny_threshold">40</string>
-    <string name="default_accumulator_threshold">20</string>
+    <string name="default_min_distance">20</string>
+    <string name="default_min_radius">20</string>
+    <string name="default_max_radius">400</string>
+    <string name="default_canny_threshold">100</string>
+    <string name="default_accumulator_threshold">200</string>
+    <string name="default_blur_size">5</string>
 
+    <string name="max_min_distance">100</string>
+    <string name="max_min_radius">100</string>
+    <string name="max_max_radius">400</string>
+    <string name="max_canny_threshold">200</string>
+    <string name="max_accumulator_threshold">200</string>
+    <string name="max_blur_size">20</string>
+
+	<string name="action_rgbpreview">RGB</string>
+    <string name="action_cannyedges">Canny</string>
+    <string name="action_houghcircles">Circles</string>
+    <string name="action_houghlines">Lines</string>
+	
 </resources>

@@ -1,10 +1,6 @@
 -- Merging decision tree log ---
 manifest
 ADDED from AndroidManifest.xml:2:1
-	xmlns:tools
-		ADDED from AndroidManifest.xml:4:5
-	xmlns:android
-		ADDED from AndroidManifest.xml:3:5
 	package
 		ADDED from AndroidManifest.xml:5:5
 		INJECTED from AndroidManifest.xml:0:0
@@ -12,21 +8,25 @@ ADDED from AndroidManifest.xml:2:1
 	android:versionName
 		INJECTED from AndroidManifest.xml:0:0
 		INJECTED from AndroidManifest.xml:0:0
+	xmlns:tools
+		ADDED from AndroidManifest.xml:4:5
+	xmlns:android
+		ADDED from AndroidManifest.xml:3:5
 	android:versionCode
 		INJECTED from AndroidManifest.xml:0:0
 		INJECTED from AndroidManifest.xml:0:0
 supports-screens
 ADDED from AndroidManifest.xml:7:5
-	android:resizeable
-		ADDED from AndroidManifest.xml:7:23
 	android:largeScreens
 		ADDED from AndroidManifest.xml:10:23
-	android:anyDensity
-		ADDED from AndroidManifest.xml:11:23
-	android:normalScreens
-		ADDED from AndroidManifest.xml:9:23
 	android:smallScreens
 		ADDED from AndroidManifest.xml:8:23
+	android:normalScreens
+		ADDED from AndroidManifest.xml:9:23
+	android:resizeable
+		ADDED from AndroidManifest.xml:7:23
+	android:anyDensity
+		ADDED from AndroidManifest.xml:11:23
 uses-permission#android.permission.INTERNET
 ADDED from AndroidManifest.xml:13:5
 	android:name
@@ -107,6 +107,10 @@ category#android.intent.category.LAUNCHER
 ADDED from AndroidManifest.xml:33:80
 	android:name
 		ADDED from AndroidManifest.xml:33:90
+activity#us.lucidian.instacount.CameraRTDetectFragment
+ADDED from AndroidManifest.xml:36:9
+	android:name
+		ADDED from AndroidManifest.xml:36:19
 uses-sdk
 INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
 MERGED from insta-count:openCVLibrary2410:unspecified:7:5

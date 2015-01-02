@@ -24,7 +24,15 @@ import org.opencv.imgproc.Imgproc;
 
 public class LoadFromCameraFragment extends Fragment implements CvCameraViewListener2 {
     private static final String             TAG                = "InstaCount::LoadFromCameraFragment";
-    private              BaseLoaderCallback mLoaderCallback    = new BaseLoaderCallback(getActivity()) {
+    private static final String             ARG_SECTION_NUMBER = "section_number";
+
+    private CameraBridgeViewBase            mOpenCvCameraView;
+    private TextView                        tv_circle_count;
+    private ImageView                       img;
+    private Mat                             cvCameraViewFrameRgb;
+    private Mat                             cvCameraViewFrameGrey;
+
+    private BaseLoaderCallback mLoaderCallback    = new BaseLoaderCallback(getActivity()) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
@@ -40,17 +48,6 @@ public class LoadFromCameraFragment extends Fragment implements CvCameraViewList
             }
         }
     };
-    private static final String             ARG_SECTION_NUMBER = "section_number";
-    private static final int                VIEW_MODE_RGBA     = 0;
-    private static final int                VIEW_MODE_CANNY    = 2;
-    private static final int                VIEW_MODE_CIRCLES  = 6;
-    private int                  mViewMode;
-    private CameraBridgeViewBase mOpenCvCameraView;
-    private TextView             tv_circle_count;
-    private ImageView            img;
-
-    private Mat cvCameraViewFrameRgb;
-    private Mat cvCameraViewFrameGrey;
 
     public LoadFromCameraFragment() { Log.i(TAG, "Instantiated new LoadFromCameraFragment"); }
 
@@ -63,10 +60,7 @@ public class LoadFromCameraFragment extends Fragment implements CvCameraViewList
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //if (getArguments() != null) { int mSectionNumber = getArguments().getInt(ARG_SECTION_NUMBER); }
-    }
+    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,26 +68,25 @@ public class LoadFromCameraFragment extends Fragment implements CvCameraViewList
         img = (ImageView) load_from_camera_view.findViewById(R.id.ImageView01);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         tv_circle_count = (TextView) load_from_camera_view.findViewById(R.id.tv_circle_count);
-        tv_circle_count.setText(InstaCountUtils.BuildInfoMessage(0, 0, 0));
+        tv_circle_count.setText(InstaCountUtils.SetInfoMessage());
 
         mOpenCvCameraView = (CameraBridgeViewBase) load_from_camera_view.findViewById(R.id.instacount_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
         load_from_camera_view.findViewById(R.id.btn_camera_view).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mOpenCvCameraView != null && img !=null) {
-                        mOpenCvCameraView.enableView();
-                        mOpenCvCameraView.setVisibility(View.VISIBLE);
-                        img.setVisibility(View.GONE);
-                    }
+            @Override
+            public void onClick(View v) {
+                if (mOpenCvCameraView != null && img != null) {
+                    mOpenCvCameraView.enableView();
+                    mOpenCvCameraView.setVisibility(View.VISIBLE);
+                    img.setVisibility(View.GONE);
                 }
-         });
+            }
+        });
 
         load_from_camera_view.findViewById(R.id.btn_detect_circles).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mViewMode = VIEW_MODE_CIRCLES;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -101,32 +94,33 @@ public class LoadFromCameraFragment extends Fragment implements CvCameraViewList
                         InstaCountUtils.mGray = cvCameraViewFrameGrey;
                         tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
                         try {
-                            Bitmap bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
-                            Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
+                            Bitmap bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
+                            //Bitmap resizedBmp32 = InstaCountUtils.GetResizedBitmap(bmp32);
+                            Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
                             img.setImageBitmap(bmp32);
                             if (mOpenCvCameraView != null) {
                                 mOpenCvCameraView.disableView();
                                 mOpenCvCameraView.setVisibility(View.GONE);
                             }
                             img.setVisibility(View.VISIBLE);
-
-                        } catch (Exception e) {
-                            Log.e(TAG, "load_from_camera_view: Exception = " + e.getMessage());
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "load_from_camera_view detect: Exception = " + e.getMessage());
                         }
                     }
                 });
             }
         });
+        
         load_from_camera_view.findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mViewMode = VIEW_MODE_CANNY;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         InstaCountUtils.mRgba = cvCameraViewFrameRgb;
                         InstaCountUtils.mGray = cvCameraViewFrameGrey;
-                        Imgproc.Canny(InstaCountUtils.mGray, InstaCountUtils.mIntermediateMat, 80, 100);
+                        Imgproc.Canny(InstaCountUtils.mGray, InstaCountUtils.mIntermediateMat, 35, 75);
                         Imgproc.cvtColor(InstaCountUtils.mIntermediateMat, InstaCountUtils.mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
                         try {
                             Bitmap bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
@@ -137,14 +131,42 @@ public class LoadFromCameraFragment extends Fragment implements CvCameraViewList
                                 mOpenCvCameraView.setVisibility(View.GONE);
                             }
                             img.setVisibility(View.VISIBLE);
-
-                        } catch (Exception e) {
-                            Log.e(TAG, "load_from_camera_view: Exception = " + e.getMessage());
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "load_from_camera_view canny: Exception = " + e.getMessage());
                         }
                     }
                 });
             }
         });
+        
+        load_from_camera_view.findViewById(R.id.btn_detect_ellipses).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        InstaCountUtils.mRgba = cvCameraViewFrameRgb;
+                        InstaCountUtils.mGray = cvCameraViewFrameGrey;
+                        tv_circle_count.setText(InstaCountUtils.DetectEllipses(getActivity()));
+                        try {
+                            Bitmap bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
+                            Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
+                            img.setImageBitmap(bmp32);
+                            if (mOpenCvCameraView != null) {
+                                mOpenCvCameraView.disableView();
+                                mOpenCvCameraView.setVisibility(View.GONE);
+                            }
+                            img.setVisibility(View.VISIBLE);
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "load_from_camera_view greyscale: Exception = " + e.getMessage());
+                        }
+                    }
+                });
+            }
+        });
+        
         return load_from_camera_view;
     }
 
@@ -187,6 +209,7 @@ public class LoadFromCameraFragment extends Fragment implements CvCameraViewList
     public Mat onCameraFrame(final CvCameraViewFrame inputFrame) {
         cvCameraViewFrameRgb = inputFrame.rgba();
         cvCameraViewFrameGrey = inputFrame.gray();
+        //Core.rectangle(cvCameraViewFrameRgb, new Point(10, 10), new Point(cvCameraViewFrameRgb.cols() / 2.0, cvCameraViewFrameRgb.rows() / 2.0), new Scalar(0, 0, 255), 0, 8, 0);
         return cvCameraViewFrameRgb;
     }
 }

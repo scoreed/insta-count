@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.Arrays;
 
 @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
 public class LoadFromGalleryFragment extends Fragment implements ImageChooserListener {
@@ -83,33 +86,129 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
 
         load_from_gallery_view.findViewById(R.id.btn_detect_circles).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if (mSelectedImage == null) return;
-                InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
-                InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
-                Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
-                Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
-                Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
-                tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
-                bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
-                img.setImageBitmap(bmp32);
-            }
+            public void onClick(View v) { runCircleDetect(); }
         });
 
         load_from_gallery_view.findViewById(R.id.btn_reset_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mSelectedImage == null) return;
-                tv_circle_count.setText(InstaCountUtils.BuildInfoMessage(0, 0, 0));
+                tv_circle_count.setText(InstaCountUtils.SetInfoMessage());
                 Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
                 img.setImageBitmap(bmp32);
             }
         });
 
+        InstaCountUtils.LoadSharedPreferences(getActivity());
+        ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+        final String[] stringArray = new String[20];
+        int n = 1;
+        for (int i = 0; i < 20; i++) {
+            stringArray[i] = Integer.toString(n);
+            n += 2;
+        }
+        NumberPicker np_params_blur = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_blur);
+        np_params_blur.setMaxValue(stringArray.length - 1);
+        np_params_blur.setMinValue(0);
+        np_params_blur.setDisplayedValues(stringArray);
+        np_params_blur.setWrapSelectorWheel(false);
+        int i = Arrays.asList(stringArray).indexOf(Integer.toString(InstaCountUtils.blurSize));
+        np_params_blur.setValue(i);
+        np_params_blur.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                InstaCountUtils.blurSize = Integer.parseInt(stringArray[newVal]);
+                runCircleDetect();
+                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            }
+        });
+
+        NumberPicker np_params_canny = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_canny);
+        np_params_canny.setMaxValue(200);
+        np_params_canny.setMinValue(0);
+        np_params_canny.setWrapSelectorWheel(false);
+        np_params_canny.setValue(InstaCountUtils.cannyThreshold);
+        np_params_canny.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                InstaCountUtils.cannyThreshold = newVal;
+                runCircleDetect();
+                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            }
+        });
+
+        NumberPicker np_params_accum = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_accum);
+        np_params_accum.setMaxValue(200);
+        np_params_accum.setMinValue(0);
+        np_params_accum.setWrapSelectorWheel(false);
+        np_params_accum.setValue(InstaCountUtils.accumulatorThreshold);
+        np_params_accum.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                InstaCountUtils.accumulatorThreshold = newVal;
+                runCircleDetect();
+                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            }
+        });
+
+        NumberPicker np_params_min_distance = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_min_distance);
+        np_params_min_distance.setMaxValue(100);
+        np_params_min_distance.setMinValue(1);
+        np_params_min_distance.setWrapSelectorWheel(false);
+        np_params_min_distance.setValue(InstaCountUtils.minDistance);
+        np_params_min_distance.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                InstaCountUtils.minDistance = newVal;
+                runCircleDetect();
+                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            }
+        });
+
+        NumberPicker np_params_min_radius = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_min_radius);
+        np_params_min_radius.setMaxValue(100);
+        np_params_min_radius.setMinValue(1);
+        np_params_min_radius.setWrapSelectorWheel(false);
+        np_params_min_radius.setValue(InstaCountUtils.minRadius);
+        np_params_min_radius.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                InstaCountUtils.minRadius = newVal;
+                runCircleDetect();
+                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            }
+        });
+
+        NumberPicker np_params_max_radius = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_max_radius);
+        np_params_max_radius.setMaxValue(400);
+        np_params_max_radius.setMinValue(1);
+        np_params_max_radius.setWrapSelectorWheel(false);
+        np_params_max_radius.setValue(InstaCountUtils.maxRadius);
+        np_params_max_radius.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                InstaCountUtils.maxRadius = newVal;
+                runCircleDetect();
+                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            }
+        });
+        
         return load_from_gallery_view;
     }
 
+    public void runCircleDetect() {
+        if (mSelectedImage == null) return;
+        InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+        InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
+        Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+        Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
+        Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
+        tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
+        bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
+        img.setImageBitmap(bmp32);
+    }
+    
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult: requestCode = " + requestCode);
@@ -141,29 +240,28 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
             @Override
             public void run() {
                 if (chosenImage != null) {
-                    Bitmap bmp32;
                     String mSelectedImagePath = chosenImage.getFilePathOriginal();
-                    Log.d(TAG, "onImageChosen: mSelectedImagePath = " + mSelectedImagePath);
                     mSelectedImage = BitmapFactory.decodeFile(mSelectedImagePath);
-
-                    if (mSelectedImage == null) return;
-
-                    InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
-                    InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
-
-                    bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
-                    Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
-                    Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
-
-                    tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
-
-                    try {
-                        bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
-                        Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
-                        img.setImageBitmap(bmp32);
-                    } catch (Exception e) {
-                        Log.e(TAG, "onImageChosen: Exception = " + e.getMessage());
-                    }
+                    runCircleDetect();
+                    
+//                    Bitmap bmp32;
+//                    String mSelectedImagePath = chosenImage.getFilePathOriginal();
+//                    Log.d(TAG, "onImageChosen: mSelectedImagePath = " + mSelectedImagePath);
+//                    mSelectedImage = BitmapFactory.decodeFile(mSelectedImagePath);
+//                    if (mSelectedImage == null) return;
+//                    InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+//                    InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
+//                    bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+//                    Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
+//                    Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
+//                    tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
+//                    try {
+//                        bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
+//                        Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
+//                        img.setImageBitmap(bmp32);
+//                    } catch (Exception e) {
+//                        Log.e(TAG, "onImageChosen: Exception = " + e.getMessage());
+//                    }
                 }
             }
         });
@@ -193,7 +291,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
     }
 
     @Override
-    public void onPause() { super.onPause(); }
+    public void onPause() { super.onPause(); InstaCountUtils.SaveSharedPreferences(getActivity()); }
 
-    public void onDestroy() { super.onDestroy(); }
+    public void onDestroy() { super.onDestroy(); InstaCountUtils.SaveSharedPreferences(getActivity()); }
 }

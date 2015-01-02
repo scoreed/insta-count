@@ -5,6 +5,9 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -13,11 +16,20 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("UnusedDeclaration")
 public class InstaCountUtils {
@@ -26,23 +38,73 @@ public class InstaCountUtils {
     public static Mat mGray            = null;
     public static Mat mRgba            = null;
     public static Mat mIntermediateMat = null;
-    public static int mCircleCount     = 0;
+
+    public static Mat resizedGray            = null;
+    public static Mat resizedRgba            = null;
+    public static Mat resizedIntermediateMat = null;
+
+    public static int mCircleCount = 0;
+
+    public static final int PHOTO_WIDTH  = 1280;
+    public static final int PHOTO_HEIGHT = 1024;
 
     public static int minDistance;
     public static int minRadius;
     public static int maxRadius;
     public static int cannyThreshold;
     public static int accumulatorThreshold;
+    public static int blurSize;
 
-   /**
-    * void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
-    *
-    * 	image       – 8-bit, single-channel, grayscale input image.
-    * 	circles     – Output vector of found circles. Each vector is encoded as a 3-element floating-point vector (x, y, radius) .
-    * 	method      – Detection method to use. Currently, the only implemented method is CV_HOUGH_GRADIENT , which is basically 21HT.
-    * 	dp          – Inverse ratio of the accumulator resolution to the image resolution. For example, if dp=1 , the accumulator has the same resolution as the input image.
-    *                 If dp=2 , the accumulator has half as big width and height.
-    * 	minDist     – Minimum distance between the centers of the detected circles. If the parameter is too small, multiple neighbor circles may be falsely detected in addition to a true one.
+    public static String DetectEllipses(Activity activity) {
+        Log.i(TAG, "InstaCountUtils.DetectEllipses Called");
+
+        LoadSharedPreferences(activity);
+
+        resizedRgba = mRgba.clone();
+        resizedGray = mGray.clone();
+
+        Mat smoothedGray = new Mat();
+        Mat result = new Mat();
+
+        Mat threshold_output = new Mat();
+        List<MatOfPoint> contours = new ArrayList<>();
+
+        int thresh = 100;
+
+        Imgproc.threshold(resizedGray, threshold_output, thresh, 255, Imgproc.THRESH_BINARY );
+        Imgproc.findContours(threshold_output, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0) );
+
+        MatOfPoint mMOP2f1 = new MatOfPoint();
+        MatOfPoint2f mMOP2f2 = new MatOfPoint2f();
+        List<RotatedRect> minEllipse = new ArrayList<>(contours.size());
+        
+        for(int i=0;i<contours.size();i++){
+            if( contours.get(i).toArray().length > 5 ) {
+                contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
+                minEllipse.set(i, Imgproc.fitEllipse(mMOP2f2));
+            }
+        }
+        
+        for (int i = 0; i < contours.size(); i++) {
+            Scalar color = new Scalar(0, 0, 255);
+            Imgproc.drawContours(resizedRgba, contours, i, color, 1, 8, new Mat(), 0, new Point());
+            Core.ellipse(resizedRgba, minEllipse.get(i), color, 2, 8);
+        }
+        
+        mCircleCount = contours.size();
+        
+        return SetInfoMessage();
+    }
+    
+    /**
+     * void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
+     *
+     * 	image       – 8-bit, single-channel, grayscale input image.
+     * 	circles     – Output vector of found circles. Each vector is encoded as a 3-element floating-point vector (x, y, radius) .
+     * 	method      – Detection method to use. Currently, the only implemented method is CV_HOUGH_GRADIENT , which is basically 21HT.
+     * 	dp          – Inverse ratio of the accumulator resolution to the image resolution. For example, if dp=1 , the accumulator has the same resolution as the input image.
+     *                 If dp=2 , the accumulator has half as big width and height.
+     * 	minDist     – Minimum distance between the centers of the detected circles. If the parameter is too small, multiple neighbor circles may be falsely detected in addition to a true one.
     *                 If it is too large, some circles may be missed.
     * 	param1      – First method-specific parameter. In case of CV_HOUGH_GRADIENT , it is the higher threshold of the two passed to the Canny() edge detector (the lower one is twice smaller).
     * 	param2      – Second method-specific parameter. In case of CV_HOUGH_GRADIENT , it is the accumulator threshold for the circle centers at the detection stage.
@@ -53,13 +115,23 @@ public class InstaCountUtils {
     public static String DetectCircles(Activity activity) {
         Log.i(TAG, "InstaCountUtils.DetectCircles Called");
 
-        LoadSharedPreferences(activity);
+//        LoadSharedPreferences(activity);
 
+//        resizedGray = new Mat();
+//        resizedRgba = new Mat();
+
+        resizedRgba = mRgba.clone();
+        resizedGray = mGray.clone();
+        
         Mat smoothedGray = new Mat();
         Mat circles = new Mat();
 
-        Imgproc.GaussianBlur(mGray, smoothedGray, new Size(5,5), 20, 20);
-        Imgproc.HoughCircles(smoothedGray, circles, Imgproc.CV_HOUGH_GRADIENT, 1, minDistance, cannyThreshold, accumulatorThreshold, minRadius, maxRadius);
+//        Imgproc.resize(mGray, resizedGray, new Size(PHOTO_WIDTH, PHOTO_HEIGHT));
+//        Imgproc.resize(mRgba, resizedRgba, new Size(PHOTO_WIDTH, PHOTO_HEIGHT));
+       
+        Imgproc.GaussianBlur(resizedGray, smoothedGray, new Size(blurSize,blurSize), 20, 20);
+        
+        Imgproc.HoughCircles(smoothedGray, circles, Imgproc.CV_HOUGH_GRADIENT, 1.0, minDistance, cannyThreshold, accumulatorThreshold, minRadius, maxRadius);
 
         mCircleCount = circles.cols() > 50 ? 50 : circles.cols();
 
@@ -67,30 +139,32 @@ public class InstaCountUtils {
             double[] vCircle = circles.get(0, i);
             Point center = new Point(vCircle[0], vCircle[1]);
             int radius = (int) Math.round(vCircle[2]);
-            Core.circle(mRgba, center, 3, new Scalar(0, 255, 0), -1, 8, 0);     // circle center
-            Core.circle(mRgba, center, radius, new Scalar(0, 0, 255), 3, 8, 0); // circle outline
+            Core.circle(resizedRgba, center, 3, new Scalar(0, 255, 0), -1, 8, 0);     // circle center
+            Core.circle(resizedRgba, center, radius, new Scalar(0, 0, 255), 3, 8, 0); // circle outline
         }
-        return BuildInfoMessage();
+        return SetInfoMessage();
     }
 
-    public static String BuildInfoMessage() {
-        return BuildInfoMessage(mGray.rows(), mGray.cols(), mCircleCount);
-    }
-
-    public static String BuildInfoMessage(int imageRows, int imageCols, int circleCount) {
+    public static String SetInfoMessage() {
         String info;
-        info = "Image Rows: " + String.valueOf(imageRows) + "  ";
-        info += "Image Cols: " + String.valueOf(imageCols) + "  ";
-        info += "Circle Count: " + String.valueOf(circleCount);
-        Log.d(TAG, "BuildInfoMessage: info = " + info);
+        info = "";
+
+        info += "Rows: "; if (mRgba != null) info += String.valueOf(mRgba.rows()) + "  ";
+        info += "Cols: "; if (mRgba != null) info += String.valueOf(mRgba.cols()) + "  ";
+        info += "Count: " + String.valueOf(mCircleCount) + "  ";
+        info += "Blur: " + String.valueOf(blurSize) + "  ";
+        info += "Canny: " + String.valueOf(cannyThreshold) + "  ";
+        info += "Accum: " + String.valueOf(accumulatorThreshold) + "  ";
+        info += "Min Dist: " + String.valueOf(minDistance) + "  ";
+        info += "Min Rad: " + String.valueOf(minRadius) + "  ";
+        info += "Max Rad: " + String.valueOf(maxRadius);
         return info;
     }
-
-    public static void LoadSharedPreferences(Activity activity)
-    {
+    
+    public static void LoadSharedPreferences(Activity activity) {
         Log.i(TAG, "LoadSharedPreferences Called");
-
         SharedPreferences pref = activity.getPreferences(0);
+        blurSize = Integer.parseInt(pref.getString("blur_size", activity.getString(R.string.default_blur_size)));
         minDistance = Integer.parseInt(pref.getString("min_distance", activity.getString(R.string.default_min_distance)));
         minRadius = Integer.parseInt(pref.getString("min_radius", activity.getString(R.string.default_min_radius)));
         maxRadius = Integer.parseInt(pref.getString("max_radius", activity.getString(R.string.default_max_radius)));
@@ -98,6 +172,88 @@ public class InstaCountUtils {
         accumulatorThreshold = Integer.parseInt(pref.getString("accumulator_threshold", activity.getString(R.string.default_accumulator_threshold)));
     }
 
+    public static void SaveSharedPreferences(Activity activity) {
+        Log.i(TAG, "SaveSharedPreferences Called");
+        SharedPreferences pref = activity.getPreferences(0);
+        SharedPreferences.Editor edt = pref.edit();
+        edt.putString("blur_size", Integer.toString(blurSize));
+        edt.putString("min_distance", Integer.toString(minDistance));
+        edt.putString("min_radius", Integer.toString(minRadius));
+        edt.putString("max_radius", Integer.toString(maxRadius));
+        edt.putString("canny_threshold", Integer.toString(cannyThreshold));
+        edt.putString("accumulator_threshold", Integer.toString(accumulatorThreshold));
+        edt.commit();
+    }
+    
+    public static void DrawRectangle() {
+        resizedRgba = mRgba.clone();
+        Core.rectangle(resizedRgba, new Point(10,10), new Point(mRgba.cols()/2.0,mRgba.rows()/2.0), new Scalar(0,0,255),0,8,0);
+    }
+
+    public static void FindContours() {
+        // reading image
+        //Mat image = Highgui.imread(".\\testing2.jpg", Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+        // clone the image
+        Mat original = mGray.clone();
+        // thresholding the image to make a binary image
+        Imgproc.threshold(mGray, mGray, 100, 128, Imgproc.THRESH_BINARY_INV);
+        // find the center of the image
+        double[] centers = {(double)mGray.width()/2, (double)mGray.height()/2};
+        Point image_center = new Point(centers);
+
+        // finding the contours
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(mGray, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        // finding best bounding rectangle for a contour whose distance is closer to the image center that other ones
+        double d_min = Double.MAX_VALUE;
+        Rect rect_min = new Rect();
+        for (MatOfPoint contour : contours) {
+            Rect rec = Imgproc.boundingRect(contour);
+            // find the best candidates
+            if (rec.height > mGray.height()/2 & rec.width > mGray.width()/2)
+                continue;
+            Point pt1 = new Point((double)rec.x, (double)rec.y);
+            Point center = new Point(rec.x+(double)(rec.width)/2, rec.y + (double)(rec.height)/2);
+            double d = Math.sqrt(Math.pow(pt1.x-image_center.x,2) + Math.pow(pt1.y -image_center.y, 2));
+            if (d < d_min)
+            {
+                d_min = d;
+                rect_min = rec;
+            }
+        }
+        // slicing the image for result region
+        int pad = 5;
+        rect_min.x = rect_min.x - pad;
+        rect_min.y = rect_min.y - pad;
+
+        rect_min.width = rect_min.width + 2*pad;
+        rect_min.height = rect_min.height + 2*pad;
+
+        //Mat result = original.submat(rect_min);
+        resizedGray = original.submat(rect_min);
+        //Highgui.imwrite("result.png", result);
+    }
+    
+    public static Bitmap GetResizedBitmap(Bitmap bm) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) PHOTO_WIDTH) / width;
+        float scaleHeight = ((float) PHOTO_HEIGHT) / height;
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+    }
+
+    public static byte[] ResizeImage(byte[] input) {
+        Bitmap original = BitmapFactory.decodeByteArray(input, 0, input.length);
+        Bitmap resized = Bitmap.createScaledBitmap(original, PHOTO_WIDTH, PHOTO_HEIGHT, true);
+        ByteArrayOutputStream blob = new ByteArrayOutputStream();
+        resized.compress(Bitmap.CompressFormat.PNG, 100, blob);
+        return blob.toByteArray();
+    }
+    
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
      * Framework Documents, as well as the _data field for the MediaStore and

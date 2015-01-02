@@ -7,7 +7,8 @@
                 android:focusable="false"
                 android:focusableInTouchMode="true"
                 android:screenOrientation="landscape"
-                tools:context="us.lucidian.instacount.LoadFromGalleryFragment">
+                tools:context="us.lucidian.instacount.LoadFromCameraFragment">
+
     <TextView
         android:id="@+id/tv_circle_count"
         android:layout_width="fill_parent"
@@ -23,13 +24,13 @@
         android:orientation="horizontal"
         android:layout_below="@+id/tv_circle_count"
         android:layout_above="@+id/footer"
-        android:gravity="center_vertical">
+        android:gravity="center">
 
         <LinearLayout
             android:id="@+id/params_section"
             android:layout_width="0.0dip"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.75"
             android:orientation="vertical"
             android:gravity="center_vertical">
             <TextView
@@ -43,7 +44,8 @@
                 android:layout_height="110dip"
                 android:id="@+id/params_blur"
                 android:layout_gravity="center_vertical"
-                android:orientation="vertical"/>
+                android:orientation="vertical"
+                android:showDividers="beginning|middle|end"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -70,19 +72,17 @@
                 android:orientation="vertical"/>
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/ImageView01"
+        <org.opencv.android.JavaCameraView
             android:layout_width="0.0dip"
             android:layout_height="fill_parent"
             android:layout_weight="10"
-            android:background="@drawable/image_placeholder">
-        </ImageView>
+            android:id="@+id/java_surface_view"/>
 
         <LinearLayout
             android:id="@+id/params_section2"
             android:layout_width="0.0dip"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.75"
             android:orientation="vertical"
             android:gravity="center_vertical">
             <TextView
@@ -122,9 +122,9 @@
                 android:layout_gravity="center_vertical"
                 android:orientation="vertical"/>
         </LinearLayout>
-        
-    </LinearLayout>
 
+    </LinearLayout>
+    
     <LinearLayout
         android:id="@+id/footer"
         style="?android:attr/buttonBarStyle"
@@ -132,29 +132,38 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
-
         <Button
-            android:id="@+id/btn_browse_gallery"
+            android:id="@+id/btn_rbg"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Browse"/>
-
+            android:text="RGB"/>
         <Button
-            android:id="@+id/btn_reset_image"
+            android:id="@+id/btn_canny"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Reset Image"/>
-
+            android:text="Canny"/>
         <Button
-            android:id="@+id/btn_detect_circles"
+            android:id="@+id/btn_circles"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Detect Circles"/>
+            android:text="Circles"/>
+        <Button
+            android:id="@+id/btn_lines"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Lines"/>
     </LinearLayout>
+
 </RelativeLayout>
+
+
+
+
