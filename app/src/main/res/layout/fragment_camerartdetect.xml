@@ -10,7 +10,7 @@
                 tools:context="us.lucidian.instacount.CameraRTDetectFragment">
 
     <TextView
-        android:id="@+id/tv_circle_count"
+        android:id="@+id/tv_info"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -22,7 +22,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="horizontal"
-        android:layout_below="@+id/tv_circle_count"
+        android:layout_below="@+id/tv_info"
         android:layout_above="@+id/footer"
         android:gravity="center">
 

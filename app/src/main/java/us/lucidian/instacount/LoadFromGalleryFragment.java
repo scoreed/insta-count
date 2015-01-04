@@ -320,6 +320,9 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
 
     @Override
     public void onPause() { super.onPause(); InstaCountUtils.SaveSharedPreferences(getActivity()); }
-
+    
+    @Override
+    public void onStop() { super.onStop(); InstaCountUtils.SaveSharedPreferences(getActivity()); }
+    
     public void onDestroy() { super.onDestroy(); InstaCountUtils.SaveSharedPreferences(getActivity()); }
 }

@@ -73,7 +73,7 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
                 if (blur_size_tv != null) {
-                    int progress = (Math.round(progressValue/2 ))*2;
+                    int progress = (Math.round(progressValue/2 ))*2 + 1;
                     blur_size_tv.setText(Integer.toString(progress));
                 }
             }

@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -27,7 +25,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +40,7 @@ public class InstaCountUtils {
     public static int mCircleCount = 0;
     public static final int PHOTO_WIDTH  = 1280;
     public static final int PHOTO_HEIGHT = 1024;
+    public static int iLineThickness = 3;
     public static int minDistance;
     public static int minRadius;
     public static int maxRadius;
@@ -55,7 +53,7 @@ public class InstaCountUtils {
     public static int maxCannyThreshold;
     public static int maxAccumulatorThreshold;
     public static int maxBlurSize;
-    
+
     /**
      * void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
      *
@@ -99,18 +97,38 @@ public class InstaCountUtils {
             double[] vCircle = circles.get(0, i);
             Point center = new Point(vCircle[0], vCircle[1]);
             int radius = (int) Math.round(vCircle[2]);
-            Core.circle(resizedRgba, center, 3, new Scalar(0, 255, 0), -1, 8, 0);     // circle center
-            Core.circle(resizedRgba, center, radius, new Scalar(0, 0, 255), 3, 8, 0); // circle outline
+            //Core.circle(resizedRgba, center, 3, new Scalar(0, 255, 0), -1, 8, 0);     // circle center
+            Core.circle(resizedRgba, center, radius, new Scalar(0, 0, 255), iLineThickness, 8, 0); // circle outline
+            DrawCross(resizedRgba, new Scalar(0, 255, 0), center); // circle center
         }
         return SetInfoMessage();
     }
 
+    public static void DrawCross(Mat mat, Scalar color, Point pt) {
+        Point pt1 = new Point(0, 0);
+        Point pt2 = new Point(0, 0);
+        int iCentreCrossWidth = 24;
+        pt1.x = pt.x - (iCentreCrossWidth >> 1);
+        pt1.y = pt.y;
+        pt2.x = pt.x + (iCentreCrossWidth >> 1);
+        pt2.y = pt.y;
+        Core.line(mat, pt1, pt2, color, iLineThickness - 1);
+        pt1.x = pt.x;
+        pt1.y = pt.y + (iCentreCrossWidth >> 1);
+        pt2.x = pt.x;
+        pt2.y = pt.y - (iCentreCrossWidth >> 1);
+        Core.line(mat, pt1, pt2, color, iLineThickness - 1);
+    }
+    
     public static String SetInfoMessage() {
         String info;
         info = "";
 
-        info += "Rows: "; if (mRgba != null) info += String.valueOf(mRgba.rows()) + "  ";
-        info += "Cols: "; if (mRgba != null) info += String.valueOf(mRgba.cols()) + "  ";
+        info += "Rows: ";
+        info = info + ((mRgba != null) ? String.valueOf(mRgba.rows()) : "0") + " ";
+        info += "Cols: ";
+        info = info + ((mRgba != null) ? String.valueOf(mRgba.cols()) : "0") + " ";
+        
         info += "Count: " + String.valueOf(mCircleCount) + "  ";
         info += "Blur: " + String.valueOf(blurSize) + "  ";
         info += "Canny: " + String.valueOf(cannyThreshold) + "  ";
@@ -242,22 +260,27 @@ public class InstaCountUtils {
         return SetInfoMessage();
     }
 
-    public static Bitmap GetResizedBitmap(Bitmap bm) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) PHOTO_WIDTH) / width;
-        float scaleHeight = ((float) PHOTO_HEIGHT) / height;
-        Matrix matrix = new Matrix();
-        matrix.postScale(scaleWidth, scaleHeight);
-        return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
-    }
-
-    public static byte[] ResizeImage(byte[] input) {
-        Bitmap original = BitmapFactory.decodeByteArray(input, 0, input.length);
-        Bitmap resized = Bitmap.createScaledBitmap(original, PHOTO_WIDTH, PHOTO_HEIGHT, true);
-        ByteArrayOutputStream blob = new ByteArrayOutputStream();
-        resized.compress(Bitmap.CompressFormat.PNG, 100, blob);
-        return blob.toByteArray();
+    public Bitmap resizeImageForImageView(Bitmap bitmap) {
+        Bitmap resizedBitmap = null;
+        int originalWidth = bitmap.getWidth();
+        int originalHeight = bitmap.getHeight();
+        int newWidth = -1;
+        int newHeight = -1;
+        float multFactor;
+        if(originalHeight > originalWidth) {
+            newHeight = PHOTO_WIDTH;
+            multFactor = (float) originalWidth/(float) originalHeight;
+            newWidth = (int) (newHeight*multFactor);
+        } else if(originalWidth > originalHeight) {
+            newWidth = PHOTO_WIDTH;
+            multFactor = (float) originalHeight/ (float)originalWidth;
+            newHeight = (int) (newWidth*multFactor);
+        } else if(originalHeight == originalWidth) {
+            newHeight = PHOTO_WIDTH;
+            newWidth = PHOTO_WIDTH;
+        }
+        resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+        return resizedBitmap;
     }
     
     /**
