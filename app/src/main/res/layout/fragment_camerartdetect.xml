@@ -7,7 +7,7 @@
                 android:focusable="false"
                 android:focusableInTouchMode="true"
                 android:screenOrientation="landscape"
-                tools:context="us.lucidian.instacount.LoadFromCameraFragment">
+                tools:context="us.lucidian.instacount.CameraRTDetectFragment">
 
     <TextView
         android:id="@+id/tv_circle_count"
@@ -153,13 +153,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Circles"/>
-        <Button
-            android:id="@+id/btn_lines"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Lines"/>
     </LinearLayout>
 
 </RelativeLayout>

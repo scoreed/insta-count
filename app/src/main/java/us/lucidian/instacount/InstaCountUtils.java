@@ -34,67 +34,27 @@ import java.util.List;
 @SuppressWarnings("UnusedDeclaration")
 public class InstaCountUtils {
     private static final String TAG = "InstaCount::InstaCountUtils";
-
     public static Mat mGray            = null;
     public static Mat mRgba            = null;
     public static Mat mIntermediateMat = null;
-
     public static Mat resizedGray            = null;
     public static Mat resizedRgba            = null;
     public static Mat resizedIntermediateMat = null;
-
     public static int mCircleCount = 0;
-
     public static final int PHOTO_WIDTH  = 1280;
     public static final int PHOTO_HEIGHT = 1024;
-
     public static int minDistance;
     public static int minRadius;
     public static int maxRadius;
     public static int cannyThreshold;
     public static int accumulatorThreshold;
     public static int blurSize;
-
-    public static String DetectEllipses(Activity activity) {
-        Log.i(TAG, "InstaCountUtils.DetectEllipses Called");
-
-        LoadSharedPreferences(activity);
-
-        resizedRgba = mRgba.clone();
-        resizedGray = mGray.clone();
-
-        Mat smoothedGray = new Mat();
-        Mat result = new Mat();
-
-        Mat threshold_output = new Mat();
-        List<MatOfPoint> contours = new ArrayList<>();
-
-        int thresh = 100;
-
-        Imgproc.threshold(resizedGray, threshold_output, thresh, 255, Imgproc.THRESH_BINARY );
-        Imgproc.findContours(threshold_output, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0) );
-
-        MatOfPoint mMOP2f1 = new MatOfPoint();
-        MatOfPoint2f mMOP2f2 = new MatOfPoint2f();
-        List<RotatedRect> minEllipse = new ArrayList<>(contours.size());
-        
-        for(int i=0;i<contours.size();i++){
-            if( contours.get(i).toArray().length > 5 ) {
-                contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
-                minEllipse.set(i, Imgproc.fitEllipse(mMOP2f2));
-            }
-        }
-        
-        for (int i = 0; i < contours.size(); i++) {
-            Scalar color = new Scalar(0, 0, 255);
-            Imgproc.drawContours(resizedRgba, contours, i, color, 1, 8, new Mat(), 0, new Point());
-            Core.ellipse(resizedRgba, minEllipse.get(i), color, 2, 8);
-        }
-        
-        mCircleCount = contours.size();
-        
-        return SetInfoMessage();
-    }
+    public static int maxMinDistance;
+    public static int maxMinRadius;
+    public static int maxMaxRadius;
+    public static int maxCannyThreshold;
+    public static int maxAccumulatorThreshold;
+    public static int maxBlurSize;
     
     /**
      * void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
@@ -164,12 +124,20 @@ public class InstaCountUtils {
     public static void LoadSharedPreferences(Activity activity) {
         Log.i(TAG, "LoadSharedPreferences Called");
         SharedPreferences pref = activity.getPreferences(0);
+        
         blurSize = Integer.parseInt(pref.getString("blur_size", activity.getString(R.string.default_blur_size)));
         minDistance = Integer.parseInt(pref.getString("min_distance", activity.getString(R.string.default_min_distance)));
         minRadius = Integer.parseInt(pref.getString("min_radius", activity.getString(R.string.default_min_radius)));
         maxRadius = Integer.parseInt(pref.getString("max_radius", activity.getString(R.string.default_max_radius)));
         cannyThreshold = Integer.parseInt(pref.getString("canny_threshold", activity.getString(R.string.default_canny_threshold)));
         accumulatorThreshold = Integer.parseInt(pref.getString("accumulator_threshold", activity.getString(R.string.default_accumulator_threshold)));
+
+        maxBlurSize = Integer.parseInt(activity.getString(R.string.max_blur_size));
+        maxMinDistance = Integer.parseInt(activity.getString(R.string.max_min_distance));
+        maxMinRadius = Integer.parseInt(activity.getString(R.string.max_min_radius));
+        maxMaxRadius = Integer.parseInt(activity.getString(R.string.max_max_radius));
+        maxCannyThreshold = Integer.parseInt(activity.getString(R.string.max_canny_threshold));
+        maxAccumulatorThreshold = Integer.parseInt(activity.getString(R.string.max_accumulator_threshold));
     }
 
     public static void SaveSharedPreferences(Activity activity) {
@@ -191,12 +159,12 @@ public class InstaCountUtils {
     }
 
     public static void FindContours() {
-        // reading image
-        //Mat image = Highgui.imread(".\\testing2.jpg", Highgui.CV_LOAD_IMAGE_GRAYSCALE);
         // clone the image
         Mat original = mGray.clone();
+        
         // thresholding the image to make a binary image
         Imgproc.threshold(mGray, mGray, 100, 128, Imgproc.THRESH_BINARY_INV);
+        
         // find the center of the image
         double[] centers = {(double)mGray.width()/2, (double)mGray.height()/2};
         Point image_center = new Point(centers);
@@ -227,15 +195,53 @@ public class InstaCountUtils {
         int pad = 5;
         rect_min.x = rect_min.x - pad;
         rect_min.y = rect_min.y - pad;
-
         rect_min.width = rect_min.width + 2*pad;
         rect_min.height = rect_min.height + 2*pad;
-
-        //Mat result = original.submat(rect_min);
+        
         resizedGray = original.submat(rect_min);
-        //Highgui.imwrite("result.png", result);
     }
     
+    public static String DetectEllipses(Activity activity) {
+        Log.i(TAG, "InstaCountUtils.DetectEllipses Called");
+
+        LoadSharedPreferences(activity);
+
+        resizedRgba = mRgba.clone();
+        resizedGray = mGray.clone();
+
+        Mat smoothedGray = new Mat();
+        Mat result = new Mat();
+
+        Mat threshold_output = new Mat();
+        List<MatOfPoint> contours = new ArrayList<>();
+
+        int thresh = 100;
+
+        Imgproc.threshold(resizedGray, threshold_output, thresh, 255, Imgproc.THRESH_BINARY );
+        Imgproc.findContours(threshold_output, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0) );
+
+        MatOfPoint mMOP2f1 = new MatOfPoint();
+        MatOfPoint2f mMOP2f2 = new MatOfPoint2f();
+        List<RotatedRect> minEllipse = new ArrayList<>(contours.size());
+
+        for(int i=0;i<contours.size();i++){
+            if( contours.get(i).toArray().length > 5 ) {
+                contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
+                minEllipse.set(i, Imgproc.fitEllipse(mMOP2f2));
+            }
+        }
+
+        for (int i = 0; i < contours.size(); i++) {
+            Scalar color = new Scalar(0, 0, 255);
+            Imgproc.drawContours(resizedRgba, contours, i, color, 1, 8, new Mat(), 0, new Point());
+            Core.ellipse(resizedRgba, minEllipse.get(i), color, 2, 8);
+        }
+
+        mCircleCount = contours.size();
+
+        return SetInfoMessage();
+    }
+
     public static Bitmap GetResizedBitmap(Bitmap bm) {
         int width = bm.getWidth();
         int height = bm.getHeight();

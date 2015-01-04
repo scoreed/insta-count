@@ -6,6 +6,7 @@
                 android:clickable="true"
                 android:focusable="false"
                 android:focusableInTouchMode="true"
+                android:screenOrientation="landscape"
                 tools:context="us.lucidian.instacount.SettingsFragment">
 
     <ScrollView
@@ -16,9 +17,46 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:background="@drawable/background_cut_tile"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_cut_tile"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gaussian Blur Amount:"
+                    android:textAppearance="@android:style/TextAppearance.Small"
+                    android:layout_marginLeft="25dp"/>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="35.0dip"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="5.0dip">
+                    <SeekBar
+                        android:layout_width="0dp"
+                        android:layout_height="fill_parent"
+                        android:id="@+id/blur_size_seek_bar"
+                        android:max="@string/max_blur_size"
+                        android:layout_marginLeft="25dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_weight="3"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Body1"
+                        android:text="Value"
+                        android:id="@+id/blur_size_tv"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+            </LinearLayout>
+            
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

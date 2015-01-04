@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,8 +26,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
 
 @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
 public class LoadFromGalleryFragment extends Fragment implements ImageChooserListener {
@@ -76,6 +73,9 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         load_from_gallery_view = inflater.inflate(R.layout.fragment_load_from_gallery, container, false);
+
+        InstaCountUtils.LoadSharedPreferences(getActivity());
+
         tv_circle_count = (TextView) load_from_gallery_view.findViewById(R.id.tv_circle_count);
         img = (ImageView) load_from_gallery_view.findViewById(R.id.ImageView01);
 
@@ -98,106 +98,153 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 img.setImageBitmap(bmp32);
             }
         });
-
-        InstaCountUtils.LoadSharedPreferences(getActivity());
-        ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-        final String[] stringArray = new String[20];
-        int n = 1;
-        for (int i = 0; i < 20; i++) {
-            stringArray[i] = Integer.toString(n);
-            n += 2;
-        }
-        NumberPicker np_params_blur = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_blur);
-        np_params_blur.setMaxValue(stringArray.length - 1);
-        np_params_blur.setMinValue(0);
-        np_params_blur.setDisplayedValues(stringArray);
-        np_params_blur.setWrapSelectorWheel(false);
-        int i = Arrays.asList(stringArray).indexOf(Integer.toString(InstaCountUtils.blurSize));
-        np_params_blur.setValue(i);
-        np_params_blur.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        
+        load_from_gallery_view.findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.blurSize = Integer.parseInt(stringArray[newVal]);
-                runCircleDetect();
-                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-            }
-        });
-
-        NumberPicker np_params_canny = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_canny);
-        np_params_canny.setMaxValue(200);
-        np_params_canny.setMinValue(0);
-        np_params_canny.setWrapSelectorWheel(false);
-        np_params_canny.setValue(InstaCountUtils.cannyThreshold);
-        np_params_canny.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.cannyThreshold = newVal;
-                runCircleDetect();
-                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-            }
-        });
-
-        NumberPicker np_params_accum = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_accum);
-        np_params_accum.setMaxValue(200);
-        np_params_accum.setMinValue(0);
-        np_params_accum.setWrapSelectorWheel(false);
-        np_params_accum.setValue(InstaCountUtils.accumulatorThreshold);
-        np_params_accum.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.accumulatorThreshold = newVal;
-                runCircleDetect();
-                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-            }
-        });
-
-        NumberPicker np_params_min_distance = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_min_distance);
-        np_params_min_distance.setMaxValue(100);
-        np_params_min_distance.setMinValue(1);
-        np_params_min_distance.setWrapSelectorWheel(false);
-        np_params_min_distance.setValue(InstaCountUtils.minDistance);
-        np_params_min_distance.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.minDistance = newVal;
-                runCircleDetect();
-                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-            }
-        });
-
-        NumberPicker np_params_min_radius = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_min_radius);
-        np_params_min_radius.setMaxValue(100);
-        np_params_min_radius.setMinValue(1);
-        np_params_min_radius.setWrapSelectorWheel(false);
-        np_params_min_radius.setValue(InstaCountUtils.minRadius);
-        np_params_min_radius.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.minRadius = newVal;
-                runCircleDetect();
-                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-            }
-        });
-
-        NumberPicker np_params_max_radius = (NumberPicker)load_from_gallery_view.findViewById(R.id.params_max_radius);
-        np_params_max_radius.setMaxValue(400);
-        np_params_max_radius.setMinValue(1);
-        np_params_max_radius.setWrapSelectorWheel(false);
-        np_params_max_radius.setValue(InstaCountUtils.maxRadius);
-        np_params_max_radius.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.maxRadius = newVal;
-                runCircleDetect();
-                ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                if (mSelectedImage == null) return;
+                InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+                InstaCountUtils.mIntermediateMat = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+                InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
+                
+                Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+                Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
+                Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
+                
+                if (InstaCountUtils.mGray == null) Log.e(TAG, "load_from_gallery_view mGray is null");
+                if (InstaCountUtils.mIntermediateMat == null) Log.e(TAG, "load_from_gallery_view mIntermediateMat is null");
+                
+                try {
+                    Imgproc.Canny(InstaCountUtils.mGray, InstaCountUtils.mIntermediateMat, 35, InstaCountUtils.cannyThreshold);
+                    Imgproc.cvtColor(InstaCountUtils.mIntermediateMat, InstaCountUtils.mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
+                    bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
+                    img.setImageBitmap(bmp32);
+                }
+                catch (Exception e) {
+                    Log.e(TAG, "load_from_gallery_view canny: Exception = " + e.getMessage());
+                }
             }
         });
         
+        ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+
+        load_from_gallery_view.findViewById(R.id.btn_blur_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.blurSize <= InstaCountUtils.maxBlurSize) {
+                    InstaCountUtils.blurSize += 2;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_blur_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.blurSize >= 3) {
+                    InstaCountUtils.blurSize -= 2;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_canny_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.cannyThreshold <= InstaCountUtils.maxCannyThreshold) {
+                    InstaCountUtils.cannyThreshold++;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_canny_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.cannyThreshold > 1) {
+                    InstaCountUtils.cannyThreshold--;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_accum_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.accumulatorThreshold <= InstaCountUtils.maxAccumulatorThreshold) {
+                    InstaCountUtils.accumulatorThreshold++;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_accum_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.accumulatorThreshold > 1) {
+                    InstaCountUtils.accumulatorThreshold--;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_min_distance_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minDistance <= InstaCountUtils.maxMinDistance) {
+                    InstaCountUtils.minDistance++;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_min_distance_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minDistance > 1) {
+                    InstaCountUtils.minDistance--;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_min_radius_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minRadius <= InstaCountUtils.maxMinRadius) {
+                    InstaCountUtils.minRadius++;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_min_radius_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minRadius > 1) {
+                    InstaCountUtils.minRadius--;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_max_radius_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.maxRadius <= InstaCountUtils.maxMaxRadius) {
+                    InstaCountUtils.maxRadius++;
+                    runCircleDetect();
+                }
+            }
+        });
+        load_from_gallery_view.findViewById(R.id.btn_max_radius_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.maxRadius > 1) {
+                    InstaCountUtils.maxRadius--;
+                    runCircleDetect();
+                }
+            }
+        });
         return load_from_gallery_view;
     }
 
     public void runCircleDetect() {
-        if (mSelectedImage == null) return;
+        if (mSelectedImage == null) {
+            ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            return;
+        }
         InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
         InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
         Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
@@ -243,25 +290,6 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                     String mSelectedImagePath = chosenImage.getFilePathOriginal();
                     mSelectedImage = BitmapFactory.decodeFile(mSelectedImagePath);
                     runCircleDetect();
-                    
-//                    Bitmap bmp32;
-//                    String mSelectedImagePath = chosenImage.getFilePathOriginal();
-//                    Log.d(TAG, "onImageChosen: mSelectedImagePath = " + mSelectedImagePath);
-//                    mSelectedImage = BitmapFactory.decodeFile(mSelectedImagePath);
-//                    if (mSelectedImage == null) return;
-//                    InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
-//                    InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
-//                    bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
-//                    Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
-//                    Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
-//                    tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
-//                    try {
-//                        bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
-//                        Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
-//                        img.setImageBitmap(bmp32);
-//                    } catch (Exception e) {
-//                        Log.e(TAG, "onImageChosen: Exception = " + e.getMessage());
-//                    }
                 }
             }
         });

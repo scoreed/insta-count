@@ -100,7 +100,6 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
     private static final String             ARG_SECTION_NUMBER = "section_number";
     public static final int     VIEW_MODE_RGBA         = 0;
     public static final int     VIEW_MODE_HOUGHCIRCLES = 1;
-    public static final int     VIEW_MODE_HOUGHLINES   = 2;
     public static final int     VIEW_MODE_CANNY        = 3;
     public static       int     viewMode               = VIEW_MODE_RGBA;
     private             boolean bShootNow              = false;
@@ -167,20 +166,13 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
                 lMilliStart = 0;
             }
         });
-        findViewById(R.id.btn_lines).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewMode = VIEW_MODE_HOUGHLINES;
-                lFrameCount = 0;
-                lMilliStart = 0;
-            }
-        });
 
         InstaCountUtils.LoadSharedPreferences(this);
+
         ((TextView)findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-        final String[] stringArray = new String[20];
+        final String[] stringArray = new String[InstaCountUtils.maxBlurSize / 2];
         int n = 1;
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < InstaCountUtils.maxBlurSize / 2; i++) {
             stringArray[i] = Integer.toString(n);
             n += 2;
         }
@@ -202,7 +194,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         });
 
         NumberPicker np_params_canny = (NumberPicker)findViewById(R.id.params_canny);
-        np_params_canny.setMaxValue(200);
+        np_params_canny.setMaxValue(InstaCountUtils.maxCannyThreshold);
         np_params_canny.setMinValue(0);
         np_params_canny.setWrapSelectorWheel(false);
         np_params_canny.setValue(InstaCountUtils.cannyThreshold);
@@ -215,7 +207,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         });
 
         NumberPicker np_params_accum = (NumberPicker)findViewById(R.id.params_accum);
-        np_params_accum.setMaxValue(200);
+        np_params_accum.setMaxValue(InstaCountUtils.maxAccumulatorThreshold);
         np_params_accum.setMinValue(0);
         np_params_accum.setWrapSelectorWheel(false);
         np_params_accum.setValue(InstaCountUtils.accumulatorThreshold);
@@ -228,7 +220,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         });
 
         NumberPicker np_params_min_distance = (NumberPicker)findViewById(R.id.params_min_distance);
-        np_params_min_distance.setMaxValue(100);
+        np_params_min_distance.setMaxValue(InstaCountUtils.maxMinDistance);
         np_params_min_distance.setMinValue(1);
         np_params_min_distance.setWrapSelectorWheel(false);
         np_params_min_distance.setValue(InstaCountUtils.minDistance);
@@ -241,7 +233,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         });
 
         NumberPicker np_params_min_radius = (NumberPicker)findViewById(R.id.params_min_radius);
-        np_params_min_radius.setMaxValue(100);
+        np_params_min_radius.setMaxValue(InstaCountUtils.maxMinRadius);
         np_params_min_radius.setMinValue(1);
         np_params_min_radius.setWrapSelectorWheel(false);
         np_params_min_radius.setValue(InstaCountUtils.minRadius);
@@ -254,7 +246,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         });
 
         NumberPicker np_params_max_radius = (NumberPicker)findViewById(R.id.params_max_radius);
-        np_params_max_radius.setMaxValue(400);
+        np_params_max_radius.setMaxValue(InstaCountUtils.maxMaxRadius);
         np_params_max_radius.setMinValue(1);
         np_params_max_radius.setWrapSelectorWheel(false);
         np_params_max_radius.setValue(InstaCountUtils.maxRadius);
@@ -290,7 +282,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
     public void onCameraViewStarted(int width, int height) {
         colorRed = new Scalar(255, 0, 0, 255);
         colorGreen = new Scalar(0, 255, 0, 255);
-        colorWhite = new Scalar(0, 0, 255);
+        colorWhite = new Scalar(255, 255, 255);
         lines = new Mat();
         mGray = new Mat();
         mIntermediateMat = new Mat();
@@ -335,26 +327,19 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         sMatSize.height = mRgba.height();
         switch (viewMode) {
             case VIEW_MODE_RGBA:
-                ShowTitle("RGV", 1, colorGreen);
+                ShowTitle("RGB", 1, colorGreen);
                 break;
             case VIEW_MODE_CANNY:
                 Imgproc.cvtColor(mRgba, mGray, Imgproc.COLOR_RGBA2GRAY);
-                // doing a gaussian blur prevents getting a lot of false hits
-                Imgproc.GaussianBlur(mGray, mGray, sSize5, 2, 2);
+                Imgproc.GaussianBlur(mGray, mGray, new Size(InstaCountUtils.blurSize, InstaCountUtils.blurSize), 2, 2);
                 iCannyLowerThreshold = 35;
-                InstaCountUtils.cannyThreshold = 75;
                 Imgproc.Canny(mGray, mIntermediateMat, iCannyLowerThreshold, InstaCountUtils.cannyThreshold);
                 Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2BGRA, 4);
                 ShowTitle("Canny Edges", 1, colorGreen);
                 break;
             case VIEW_MODE_HOUGHCIRCLES:
                 Imgproc.cvtColor(mRgba, mGray, Imgproc.COLOR_RGBA2GRAY);
-                // doing a gaussian blur prevents getting a lot of false hits
                 Imgproc.GaussianBlur(mGray, mGray, new Size(InstaCountUtils.blurSize, InstaCountUtils.blurSize), 2, 2);
-                // the lower this figure the more spurious circles you get
-                // 50 looks good in CANNY, but 100 is better when converting that into Hough circles
-                //InstaCountUtils.minRadius = 20;
-                //InstaCountUtils.maxRadius = 400;
                 Imgproc.HoughCircles(mGray, mIntermediateMat, Imgproc.CV_HOUGH_GRADIENT, 2.0, mGray.rows() / 8, InstaCountUtils.cannyThreshold, InstaCountUtils.accumulatorThreshold, InstaCountUtils.minRadius, InstaCountUtils.maxRadius);
                 iCircleCount = mIntermediateMat.cols() > 50 ? 50 : mIntermediateMat.cols();
                 if (mIntermediateMat.cols() > 0) for (int x = 0; x < Math.min(mIntermediateMat.cols(), 10); x++) {
@@ -364,41 +349,10 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
                     pt.y = Math.round(vCircle[1]);
                     int radius = (int) Math.round(vCircle[2]);
                     Point center = new Point(vCircle[0], vCircle[1]);
-                    // draw the found circle
-                    //Core.circle(mRgba, pt, radius, colorWhite, iLineThickness);
-                    Core.circle(mRgba, center, radius, new Scalar(0, 0, 255), 3, 8, 0); // circle outline
-                    // draw a cross on the centre of the circle
-                    DrawCross(mRgba, colorRed, pt);
+                    Core.circle(mRgba, pt, radius, colorWhite, iLineThickness);
+                    DrawCross(mRgba, colorWhite, pt);
                 }
                 ShowTitle("Hough Circles", 1, colorGreen);
-                break;
-            case VIEW_MODE_HOUGHLINES:
-                Imgproc.cvtColor(mRgba, mGray, Imgproc.COLOR_RGBA2GRAY);
-                // doing a gaussian blur prevents getting a lot of false hits
-                Imgproc.GaussianBlur(mGray, mGray, sSize5, 2, 2);
-                // the lower this figure the more spurious circles you get
-                // 50 upper looks good in CANNY, but 75 is better when converting that into Hough circles
-                iCannyLowerThreshold = 45;
-                InstaCountUtils.cannyThreshold = 75;
-                Imgproc.Canny(mGray, mGray, iCannyLowerThreshold, InstaCountUtils.cannyThreshold);
-                int iHoughLinesGap = 20;
-                int iHoughLinesMinLineSize = 20;
-                int iHoughLinesThreshold = 50;
-                Imgproc.HoughLinesP(mGray, lines, 1, Math.PI / 180, iHoughLinesThreshold, iHoughLinesMinLineSize, iHoughLinesGap);
-                for (int x = 0; x < Math.min(lines.cols(), 40); x++) {
-                    double[] vecHoughLines = lines.get(0, x);
-                    if (vecHoughLines.length == 0) break;
-                    double x1 = vecHoughLines[0];
-                    double y1 = vecHoughLines[1];
-                    double x2 = vecHoughLines[2];
-                    double y2 = vecHoughLines[3];
-                    pt1.x = x1;
-                    pt1.y = y1;
-                    pt2.x = x2;
-                    pt2.y = y2;
-                    Core.line(mRgba, pt1, pt2, colorRed, 3);
-                }
-                ShowTitle("Hough Lines", 1, colorGreen);
                 break;
         }
         // get the time now in every frame
@@ -427,7 +381,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
 
     public boolean onTouchEvent(final MotionEvent event) {
         bShootNow = true;
-        return false; // don't need more than one touch event
+        return false;
     }
 
     public void DrawCross(Mat mat, Scalar color, Point pt) {

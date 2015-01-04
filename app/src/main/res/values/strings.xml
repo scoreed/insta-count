@@ -12,9 +12,9 @@
 
     <string name="default_min_distance">20</string>
     <string name="default_min_radius">20</string>
-    <string name="default_max_radius">400</string>
-    <string name="default_canny_threshold">100</string>
-    <string name="default_accumulator_threshold">200</string>
+    <string name="default_max_radius">100</string>
+    <string name="default_canny_threshold">50</string>
+    <string name="default_accumulator_threshold">50</string>
     <string name="default_blur_size">5</string>
 
     <string name="max_min_distance">100</string>
@@ -22,11 +22,6 @@
     <string name="max_max_radius">400</string>
     <string name="max_canny_threshold">200</string>
     <string name="max_accumulator_threshold">200</string>
-    <string name="max_blur_size">20</string>
+    <string name="max_blur_size">40</string>
 
-	<string name="action_rgbpreview">RGB</string>
-    <string name="action_cannyedges">Canny</string>
-    <string name="action_houghcircles">Circles</string>
-    <string name="action_houghlines">Lines</string>
-	
 </resources>

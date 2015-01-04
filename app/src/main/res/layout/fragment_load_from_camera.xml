@@ -6,6 +6,7 @@
                 android:clickable="true"
                 android:focusable="false"
                 android:focusableInTouchMode="true"
+                android:screenOrientation="landscape"
                 tools:context="us.lucidian.instacount.LoadFromCameraFragment">
 
     <TextView
