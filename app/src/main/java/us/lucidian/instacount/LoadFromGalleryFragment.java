@@ -3,7 +3,6 @@ package us.lucidian.instacount;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -74,6 +73,9 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         load_from_gallery_view = inflater.inflate(R.layout.fragment_load_from_gallery, container, false);
 
+        InstaCountUtils.mDstWidth = getResources().getDimensionPixelSize(R.dimen.destination_width);
+        InstaCountUtils.mDstHeight = getResources().getDimensionPixelSize(R.dimen.destination_height);
+        
         InstaCountUtils.LoadSharedPreferences(getActivity());
 
         tv_circle_count = (TextView) load_from_gallery_view.findViewById(R.id.tv_circle_count);
@@ -98,7 +100,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 img.setImageBitmap(bmp32);
             }
         });
-        
+
         load_from_gallery_view.findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,6 +131,24 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
         
         ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
 
+//        left_actions = ((FloatingActionsMenu)load_from_gallery_view.findViewById(R.id.left_actions));
+//        right_actions = ((FloatingActionsMenu)load_from_gallery_view.findViewById(R.id.right_actions));
+//
+//        load_from_gallery_view.findViewById(R.id.left_actions).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(getActivity(), "Clicked left_actions", Toast.LENGTH_SHORT).show();
+//                if (left_actions.isExpanded()) { right_actions.collapse(); }
+//            }
+//        });
+//        load_from_gallery_view.findViewById(R.id.right_actions).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(getActivity(), "Clicked right_actions", Toast.LENGTH_SHORT).show();
+//                if (right_actions.isExpanded()) { left_actions.collapse(); }
+//            }
+//        });
+        
         load_from_gallery_view.findViewById(R.id.btn_blur_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -288,7 +308,13 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
             public void run() {
                 if (chosenImage != null) {
                     String mSelectedImagePath = chosenImage.getFilePathOriginal();
-                    mSelectedImage = BitmapFactory.decodeFile(mSelectedImagePath);
+                    Bitmap unscaledBitmap = ScalingUtilities.decodeFile(mSelectedImagePath, InstaCountUtils.mDstWidth, InstaCountUtils.mDstHeight, ScalingUtilities.ScalingLogic.FIT);
+                    if (unscaledBitmap.getHeight() > 1024 || unscaledBitmap.getWidth() > 1024) {
+                        mSelectedImage = ScalingUtilities.createScaledBitmap(unscaledBitmap, InstaCountUtils.mDstWidth, InstaCountUtils.mDstHeight, ScalingUtilities.ScalingLogic.FIT);
+                        unscaledBitmap.recycle();
+                    } else {
+                        mSelectedImage = unscaledBitmap;
+                    }
                     runCircleDetect();
                 }
             }

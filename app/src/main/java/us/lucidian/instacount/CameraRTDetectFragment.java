@@ -73,8 +73,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener;
@@ -92,7 +94,6 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
@@ -113,8 +114,9 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
     private long lFrameCount = 0, lMilliStart = 0, lMilliNow = 0, lMilliShotTime = 0;
     private Scalar colorRed, colorGreen, colorWhite;
     private String title, sShotText;
-    private TextView info;
-
+    private TextView            info;
+    private FloatingActionsMenu right_actions, left_actions;
+    
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -143,7 +145,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
 
         info = (TextView) findViewById(R.id.tv_info);
 
-        findViewById(R.id.btn_rbg).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_reset).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 viewMode = VIEW_MODE_RGBA;
@@ -151,14 +153,14 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
                 lMilliStart = 0;
             }
         });
-        findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewMode = VIEW_MODE_CANNY;
-                lFrameCount = 0;
-                lMilliStart = 0;
-            }
-        });
+//        findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                viewMode = VIEW_MODE_CANNY;
+//                lFrameCount = 0;
+//                lMilliStart = 0;
+//            }
+//        });
         findViewById(R.id.btn_circles).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,95 +169,128 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
                 lMilliStart = 0;
             }
         });
+        findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bShootNow = true;
+            }
+        });
 
         InstaCountUtils.LoadSharedPreferences(this);
 
         info.setText(InstaCountUtils.SetInfoMessage());
-        final String[] stringArray = new String[InstaCountUtils.maxBlurSize / 2];
-        int n = 1;
-        for (int i = 0; i < InstaCountUtils.maxBlurSize / 2; i++) {
-            stringArray[i] = Integer.toString(n);
-            n += 2;
-        }
-        NumberPicker np_params_blur = (NumberPicker) findViewById(R.id.params_blur);
-        np_params_blur.setMaxValue(stringArray.length - 1);
-        np_params_blur.setMinValue(0);
-        np_params_blur.setDisplayedValues(stringArray);
-        np_params_blur.setWrapSelectorWheel(false);
+        left_actions = ((FloatingActionsMenu)findViewById(R.id.left_actions));
+        right_actions = ((FloatingActionsMenu)findViewById(R.id.right_actions));
 
-        int i = Arrays.asList(stringArray).indexOf(Integer.toString(InstaCountUtils.blurSize));
-
-        np_params_blur.setValue(i);
-        np_params_blur.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        findViewById(R.id.left_actions).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.blurSize = Integer.parseInt(stringArray[newVal]);
-                info.setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                Toast.makeText(CameraRTDetectFragment.this, "Clicked left_actions", Toast.LENGTH_SHORT).show();
+                if (left_actions.isExpanded()) { right_actions.collapse(); }
+            }
+        });
+        findViewById(R.id.right_actions).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(CameraRTDetectFragment.this, "Clicked right_actions", Toast.LENGTH_SHORT).show();
+                if (right_actions.isExpanded()) { left_actions.collapse(); }
             }
         });
 
-        NumberPicker np_params_canny = (NumberPicker) findViewById(R.id.params_canny);
-        np_params_canny.setMaxValue(InstaCountUtils.maxCannyThreshold);
-        np_params_canny.setMinValue(0);
-        np_params_canny.setWrapSelectorWheel(false);
-        np_params_canny.setValue(InstaCountUtils.cannyThreshold);
-        np_params_canny.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        findViewById(R.id.btn_blur_up).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.cannyThreshold = newVal;
-                info.setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                if (InstaCountUtils.blurSize <= InstaCountUtils.maxBlurSize) {
+                    InstaCountUtils.blurSize += 2;
+                }
             }
         });
-
-        NumberPicker np_params_accum = (NumberPicker) findViewById(R.id.params_accum);
-        np_params_accum.setMaxValue(InstaCountUtils.maxAccumulatorThreshold);
-        np_params_accum.setMinValue(0);
-        np_params_accum.setWrapSelectorWheel(false);
-        np_params_accum.setValue(InstaCountUtils.accumulatorThreshold);
-        np_params_accum.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        findViewById(R.id.btn_blur_down).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.accumulatorThreshold = newVal;
-                info.setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                if (InstaCountUtils.blurSize >= 3) {
+                    InstaCountUtils.blurSize -= 2;
+                }
             }
         });
-
-        NumberPicker np_params_min_distance = (NumberPicker) findViewById(R.id.params_min_distance);
-        np_params_min_distance.setMaxValue(InstaCountUtils.maxMinDistance);
-        np_params_min_distance.setMinValue(1);
-        np_params_min_distance.setWrapSelectorWheel(false);
-        np_params_min_distance.setValue(InstaCountUtils.minDistance);
-        np_params_min_distance.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        findViewById(R.id.btn_canny_up).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.minDistance = newVal;
-                info.setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                if (InstaCountUtils.cannyThreshold <= InstaCountUtils.maxCannyThreshold) {
+                    InstaCountUtils.cannyThreshold++;
+                }
             }
         });
-
-        NumberPicker np_params_min_radius = (NumberPicker) findViewById(R.id.params_min_radius);
-        np_params_min_radius.setMaxValue(InstaCountUtils.maxMinRadius);
-        np_params_min_radius.setMinValue(1);
-        np_params_min_radius.setWrapSelectorWheel(false);
-        np_params_min_radius.setValue(InstaCountUtils.minRadius);
-        np_params_min_radius.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        findViewById(R.id.btn_canny_down).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.minRadius = newVal;
-                info.setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                if (InstaCountUtils.cannyThreshold > 1) {
+                    InstaCountUtils.cannyThreshold--;
+                }
             }
         });
-
-        NumberPicker np_params_max_radius = (NumberPicker) findViewById(R.id.params_max_radius);
-        np_params_max_radius.setMaxValue(InstaCountUtils.maxMaxRadius);
-        np_params_max_radius.setMinValue(1);
-        np_params_max_radius.setWrapSelectorWheel(false);
-        np_params_max_radius.setValue(InstaCountUtils.maxRadius);
-        np_params_max_radius.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        findViewById(R.id.btn_accum_up).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                InstaCountUtils.maxRadius = newVal;
-                info.setText(InstaCountUtils.SetInfoMessage());
+            public void onClick(View v) {
+                if (InstaCountUtils.accumulatorThreshold <= InstaCountUtils.maxAccumulatorThreshold) {
+                    InstaCountUtils.accumulatorThreshold++;
+                }
+            }
+        });
+        findViewById(R.id.btn_accum_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.accumulatorThreshold > 1) {
+                    InstaCountUtils.accumulatorThreshold--;
+                }
+            }
+        });
+        findViewById(R.id.btn_min_distance_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minDistance <= InstaCountUtils.maxMinDistance) {
+                    InstaCountUtils.minDistance++;
+                }
+            }
+        });
+        findViewById(R.id.btn_min_distance_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minDistance > 1) {
+                    InstaCountUtils.minDistance--;
+                }
+            }
+        });
+        findViewById(R.id.btn_min_radius_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minRadius <= InstaCountUtils.maxMinRadius) {
+                    InstaCountUtils.minRadius++;
+                }
+            }
+        });
+        findViewById(R.id.btn_min_radius_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minRadius > 1) {
+                    InstaCountUtils.minRadius--;
+                }
+            }
+        });
+        findViewById(R.id.btn_max_radius_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.maxRadius <= InstaCountUtils.maxMaxRadius) {
+                    InstaCountUtils.maxRadius++;
+                }
+            }
+        });
+        findViewById(R.id.btn_max_radius_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.maxRadius > 1) {
+                    InstaCountUtils.maxRadius--;
+                }
             }
         });
     }
@@ -405,7 +440,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
     public boolean SaveImage(Mat mat) {
         Imgproc.cvtColor(mat, InstaCountUtils.mIntermediateMat, Imgproc.COLOR_RGBA2BGR, 3);
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        String filename = "OpenCV_";
+        String filename = "instacount_";
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         Date date = new Date(System.currentTimeMillis());
         String dateString = fmt.format(date);

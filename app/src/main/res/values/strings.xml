@@ -12,7 +12,7 @@
 
     <string name="default_min_distance">20</string>
     <string name="default_min_radius">20</string>
-    <string name="default_max_radius">100</string>
+    <string name="default_max_radius">80</string>
     <string name="default_canny_threshold">50</string>
     <string name="default_accumulator_threshold">50</string>
     <string name="default_blur_size">5</string>

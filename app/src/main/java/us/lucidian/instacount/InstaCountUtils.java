@@ -5,7 +5,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -38,8 +37,6 @@ public class InstaCountUtils {
     public static Mat resizedRgba            = null;
     public static Mat resizedIntermediateMat = null;
     public static int mCircleCount = 0;
-    public static final int PHOTO_WIDTH  = 1280;
-    public static final int PHOTO_HEIGHT = 1024;
     public static int iLineThickness = 3;
     public static int minDistance;
     public static int minRadius;
@@ -53,6 +50,9 @@ public class InstaCountUtils {
     public static int maxCannyThreshold;
     public static int maxAccumulatorThreshold;
     public static int maxBlurSize;
+
+    public static int mDstWidth;
+    public static int mDstHeight;
 
     /**
      * void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
@@ -260,29 +260,6 @@ public class InstaCountUtils {
         return SetInfoMessage();
     }
 
-    public Bitmap resizeImageForImageView(Bitmap bitmap) {
-        Bitmap resizedBitmap = null;
-        int originalWidth = bitmap.getWidth();
-        int originalHeight = bitmap.getHeight();
-        int newWidth = -1;
-        int newHeight = -1;
-        float multFactor;
-        if(originalHeight > originalWidth) {
-            newHeight = PHOTO_WIDTH;
-            multFactor = (float) originalWidth/(float) originalHeight;
-            newWidth = (int) (newHeight*multFactor);
-        } else if(originalWidth > originalHeight) {
-            newWidth = PHOTO_WIDTH;
-            multFactor = (float) originalHeight/ (float)originalWidth;
-            newHeight = (int) (newWidth*multFactor);
-        } else if(originalHeight == originalWidth) {
-            newHeight = PHOTO_WIDTH;
-            newWidth = PHOTO_WIDTH;
-        }
-        resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
-        return resizedBitmap;
-    }
-    
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
      * Framework Documents, as well as the _data field for the MediaStore and
@@ -408,3 +385,5 @@ public class InstaCountUtils {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 }
+
+

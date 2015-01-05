@@ -31,14 +31,13 @@
             android:layout_width="0.0dip"
             android:layout_height="fill_parent"
             android:layout_weight="10"
-            android:scaleType="fitXY"
             android:background="@drawable/image_placeholder">
         </ImageView>
 
     </LinearLayout>
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/multiple_actions2"
+        android:id="@+id/right_actions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -47,8 +46,7 @@
         fab:fab_addButtonColorNormal="@color/white"
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"
-        fab:fab_expandDirection="up"
-        fab:fab_labelStyle="@style/menu_labels_style"
+        fab:fab_expandDirection="left"
         android:layout_marginBottom="50dp"
         android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp">
@@ -58,65 +56,59 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Min Dist +"
-            fab:fab_icon="@drawable/ic_action_content_new"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/min_dist_up"
+            fab:fab_colorNormal="@color/min_dist"
+            fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_distance_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Min Dist -"
-            fab:fab_icon="@drawable/ic_action_content_remove"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/min_dist_down"
+            fab:fab_colorNormal="@color/min_dist"
+            fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_radius_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Min Rad +"
-            fab:fab_icon="@drawable/ic_action_content_new"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/min_radius_up"
+            fab:fab_colorNormal="@color/min_radius"
+            fab:fab_colorPressed="@color/min_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_radius_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Min Rad -"
-            fab:fab_icon="@drawable/ic_action_content_remove"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/min_radius_down"
+            fab:fab_colorNormal="@color/min_radius"
+            fab:fab_colorPressed="@color/min_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_max_radius_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Max Rad +"
-            fab:fab_icon="@drawable/ic_action_content_new"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/max_radius_up"
+            fab:fab_colorNormal="@color/max_radius"
+            fab:fab_colorPressed="@color/max_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_max_radius_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Max Rad -"
-            fab:fab_icon="@drawable/ic_action_content_remove"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/max_radius_down"
+            fab:fab_colorNormal="@color/max_radius"
+            fab:fab_colorPressed="@color/max_radius_pressed"/>
         
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
     
     <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/multiple_actions1"
+        android:id="@+id/left_actions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -125,9 +117,8 @@
         fab:fab_addButtonColorNormal="@color/white"
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"
-        fab:fab_expandDirection="up"
-        fab:fab_labelStyle="@style/menu_labels_style"
-        android:layout_marginBottom="50dp"
+        fab:fab_expandDirection="right"
+        android:layout_marginBottom="45dp"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp">
 
@@ -136,63 +127,57 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Blur +"
-            fab:fab_icon="@drawable/ic_action_content_new"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/blur_up"
+            fab:fab_colorNormal="@color/blur"
+            fab:fab_colorPressed="@color/blur_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_blur_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Blur -"
-            fab:fab_icon="@drawable/ic_action_content_remove"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/blur_down"
+            fab:fab_colorNormal="@color/blur"
+            fab:fab_colorPressed="@color/blur_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_canny_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Canny +"
-            fab:fab_icon="@drawable/ic_action_content_new"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/canny_up"
+            fab:fab_colorNormal="@color/canny"
+            fab:fab_colorPressed="@color/canny_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_canny_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Canny -"
-            fab:fab_icon="@drawable/ic_action_content_remove"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/canny_down"
+            fab:fab_colorNormal="@color/canny"
+            fab:fab_colorPressed="@color/canny_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_accum_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Accum +"
-            fab:fab_icon="@drawable/ic_action_content_new"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/accum_up"
+            fab:fab_colorNormal="@color/accum"
+            fab:fab_colorPressed="@color/accum_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_accum_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_title="Accum -"
-            fab:fab_icon="@drawable/ic_action_content_remove"
-            fab:fab_colorNormal="@color/white"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/accum_down"
+            fab:fab_colorNormal="@color/accum"
+            fab:fab_colorPressed="@color/accum_pressed"/>
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
-    
+
     <LinearLayout
         android:id="@+id/footer"
         style="?android:attr/buttonBarStyle"
