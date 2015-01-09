@@ -31,7 +31,8 @@
             android:layout_width="0.0dip"
             android:layout_height="fill_parent"
             android:layout_weight="10"
-            android:background="@drawable/image_placeholder">
+            android:background="@drawable/image_placeholder"
+            android:scaleType="fitXY">
         </ImageView>
 
     </LinearLayout>
@@ -47,18 +48,10 @@
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"
         fab:fab_expandDirection="left"
+        fab:fab_size="mini"
         android:layout_marginBottom="50dp"
         android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp">
-
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_min_distance_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_icon="@drawable/min_dist_up"
-            fab:fab_colorNormal="@color/min_dist"
-            fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_distance_down"
@@ -70,13 +63,13 @@
             fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_min_radius_up"
+            android:id="@+id/btn_min_distance_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_icon="@drawable/min_radius_up"
-            fab:fab_colorNormal="@color/min_radius"
-            fab:fab_colorPressed="@color/min_radius_pressed"/>
+            fab:fab_icon="@drawable/min_dist_up"
+            fab:fab_colorNormal="@color/min_dist"
+            fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_radius_down"
@@ -88,13 +81,13 @@
             fab:fab_colorPressed="@color/min_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_max_radius_up"
+            android:id="@+id/btn_min_radius_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_icon="@drawable/max_radius_up"
-            fab:fab_colorNormal="@color/max_radius"
-            fab:fab_colorPressed="@color/max_radius_pressed"/>
+            fab:fab_icon="@drawable/min_radius_up"
+            fab:fab_colorNormal="@color/min_radius"
+            fab:fab_colorPressed="@color/min_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_max_radius_down"
@@ -104,7 +97,16 @@
             fab:fab_icon="@drawable/max_radius_down"
             fab:fab_colorNormal="@color/max_radius"
             fab:fab_colorPressed="@color/max_radius_pressed"/>
-        
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_max_radius_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_size="mini"
+            fab:fab_icon="@drawable/max_radius_up"
+            fab:fab_colorNormal="@color/max_radius"
+            fab:fab_colorPressed="@color/max_radius_pressed"/>
+
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
     
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -118,6 +120,7 @@
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"
         fab:fab_expandDirection="right"
+        fab:fab_size="mini"
         android:layout_marginBottom="45dp"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp">
@@ -194,12 +197,13 @@
             android:layout_weight="1"
             android:text="Browse"/>
         <Button
-            android:id="@+id/btn_canny"
+            android:id="@+id/btn_crop"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Canny"/>
+            android:text="Crop"
+            />
         
         <Button
             android:id="@+id/btn_reset_image"
@@ -207,7 +211,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Reset Image"/>
+            android:text="Reset"/>
 
         <Button
             android:id="@+id/btn_detect_circles"
@@ -215,7 +219,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Detect Circles"/>
+            android:text="Circles"/>
     </LinearLayout>
     
 </RelativeLayout>

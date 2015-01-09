@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.kbeanie.imagechooser.api.ChooserType;
 import com.kbeanie.imagechooser.api.ChosenImage;
 import com.kbeanie.imagechooser.api.ImageChooserListener;
@@ -54,6 +55,22 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
     private ImageChooserManager imageChooserManager;
     private String              filePath;
 
+    private boolean isMaxRadiusDownLongPressed = false;
+    private boolean isMaxRadiusUpLongPressed   = false;
+
+    private FloatingActionButton btn_blur_up;
+    private FloatingActionButton btn_blur_down;
+    private FloatingActionButton btn_canny_up;
+    private FloatingActionButton btn_canny_down;
+    private FloatingActionButton btn_accum_up;
+    private FloatingActionButton btn_accum_down;
+    private FloatingActionButton btn_min_distance_up;
+    private FloatingActionButton btn_min_distance_down;
+    private FloatingActionButton btn_min_radius_up;
+    private FloatingActionButton btn_min_radius_down;
+    private FloatingActionButton btn_max_radius_up;
+    private FloatingActionButton btn_max_radius_down;
+
     public LoadFromGalleryFragment() {
         Log.i(TAG, "Instantiated new LoadFromGalleryFragment");
     }
@@ -75,7 +92,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
 
         InstaCountUtils.mDstWidth = getResources().getDimensionPixelSize(R.dimen.destination_width);
         InstaCountUtils.mDstHeight = getResources().getDimensionPixelSize(R.dimen.destination_height);
-        
+
         InstaCountUtils.LoadSharedPreferences(getActivity());
 
         tv_circle_count = (TextView) load_from_gallery_view.findViewById(R.id.tv_circle_count);
@@ -86,11 +103,21 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
             public void onClick(View v) { chooseImage(); }
         });
 
+        load_from_gallery_view.findViewById(R.id.btn_crop).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(getActivity(), CropActivity.class);
+                startActivity(myIntent);
+            }
+        });
+
+        load_from_gallery_view.findViewById(R.id.btn_detect_circles).setVisibility(View.GONE);
         load_from_gallery_view.findViewById(R.id.btn_detect_circles).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { runCircleDetect(); }
         });
 
+        load_from_gallery_view.findViewById(R.id.btn_reset_image).setVisibility(View.GONE);
         load_from_gallery_view.findViewById(R.id.btn_reset_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,55 +128,51 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
             }
         });
 
-        load_from_gallery_view.findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mSelectedImage == null) return;
-                InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
-                InstaCountUtils.mIntermediateMat = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
-                InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
-                
-                Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
-                Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
-                Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
-                
-                if (InstaCountUtils.mGray == null) Log.e(TAG, "load_from_gallery_view mGray is null");
-                if (InstaCountUtils.mIntermediateMat == null) Log.e(TAG, "load_from_gallery_view mIntermediateMat is null");
-                
-                try {
-                    Imgproc.Canny(InstaCountUtils.mGray, InstaCountUtils.mIntermediateMat, 35, InstaCountUtils.cannyThreshold);
-                    Imgproc.cvtColor(InstaCountUtils.mIntermediateMat, InstaCountUtils.mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
-                    bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
-                    img.setImageBitmap(bmp32);
-                }
-                catch (Exception e) {
-                    Log.e(TAG, "load_from_gallery_view canny: Exception = " + e.getMessage());
-                }
-            }
-        });
+//        load_from_gallery_view.findViewById(R.id.btn_canny).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (mSelectedImage == null) return;
+//                InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+//                InstaCountUtils.mIntermediateMat = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+//                InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
+//
+//                Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+//                Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
+//                Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
+//
+//                if (InstaCountUtils.mGray == null) Log.e(TAG, "load_from_gallery_view mGray is null");
+//                if (InstaCountUtils.mIntermediateMat == null) Log.e(TAG, "load_from_gallery_view mIntermediateMat is null");
+//
+//                try {
+//                    Imgproc.Canny(InstaCountUtils.mGray, InstaCountUtils.mIntermediateMat, 35, InstaCountUtils.cannyThreshold);
+//                    Imgproc.cvtColor(InstaCountUtils.mIntermediateMat, InstaCountUtils.mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
+//                    bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
+//                    Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
+//                    img.setImageBitmap(bmp32);
+//                }
+//                catch (Exception e) {
+//                    Log.e(TAG, "load_from_gallery_view canny: Exception = " + e.getMessage());
+//                }
+//            }
+//        });
         
         ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
 
-//        left_actions = ((FloatingActionsMenu)load_from_gallery_view.findViewById(R.id.left_actions));
-//        right_actions = ((FloatingActionsMenu)load_from_gallery_view.findViewById(R.id.right_actions));
-//
-//        load_from_gallery_view.findViewById(R.id.left_actions).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getActivity(), "Clicked left_actions", Toast.LENGTH_SHORT).show();
-//                if (left_actions.isExpanded()) { right_actions.collapse(); }
-//            }
-//        });
-//        load_from_gallery_view.findViewById(R.id.right_actions).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getActivity(), "Clicked right_actions", Toast.LENGTH_SHORT).show();
-//                if (right_actions.isExpanded()) { left_actions.collapse(); }
-//            }
-//        });
-        
-        load_from_gallery_view.findViewById(R.id.btn_blur_up).setOnClickListener(new View.OnClickListener() {
+
+        btn_blur_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_blur_up);
+        btn_blur_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_blur_down);
+        btn_canny_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_canny_up);
+        btn_canny_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_canny_down);
+        btn_accum_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_accum_up);
+        btn_accum_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_accum_down);
+        btn_min_distance_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_min_distance_up);
+        btn_min_distance_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_min_distance_down);
+        btn_min_radius_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_min_radius_up);
+        btn_min_radius_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_min_radius_down);
+        btn_max_radius_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_max_radius_up);
+        btn_max_radius_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_max_radius_down);
+
+        btn_blur_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.blurSize <= InstaCountUtils.maxBlurSize) {
@@ -158,7 +181,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_blur_down).setOnClickListener(new View.OnClickListener() {
+        btn_blur_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.blurSize >= 3) {
@@ -167,7 +190,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_canny_up).setOnClickListener(new View.OnClickListener() {
+        btn_canny_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.cannyThreshold <= InstaCountUtils.maxCannyThreshold) {
@@ -176,7 +199,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_canny_down).setOnClickListener(new View.OnClickListener() {
+        btn_canny_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.cannyThreshold > 1) {
@@ -185,7 +208,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_accum_up).setOnClickListener(new View.OnClickListener() {
+        btn_accum_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.accumulatorThreshold <= InstaCountUtils.maxAccumulatorThreshold) {
@@ -194,7 +217,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_accum_down).setOnClickListener(new View.OnClickListener() {
+        btn_accum_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.accumulatorThreshold > 1) {
@@ -203,7 +226,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_min_distance_up).setOnClickListener(new View.OnClickListener() {
+        btn_min_distance_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.minDistance <= InstaCountUtils.maxMinDistance) {
@@ -212,7 +235,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_min_distance_down).setOnClickListener(new View.OnClickListener() {
+        btn_min_distance_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.minDistance > 1) {
@@ -221,7 +244,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_min_radius_up).setOnClickListener(new View.OnClickListener() {
+        btn_min_radius_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.minRadius <= InstaCountUtils.maxMinRadius) {
@@ -230,7 +253,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
-        load_from_gallery_view.findViewById(R.id.btn_min_radius_down).setOnClickListener(new View.OnClickListener() {
+        btn_min_radius_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.minRadius > 1) {
@@ -257,8 +280,57 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 }
             }
         });
+
+//        load_from_gallery_view.findViewById(R.id.btn_max_radius_up).setOnTouchListener(new View.OnTouchListener() {
+//            public boolean onTouch(View view, MotionEvent event) {
+//                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+//                    if (InstaCountUtils.maxRadius <= InstaCountUtils.maxMaxRadius) {
+//                        InstaCountUtils.maxRadius++;
+//                        InstaCountUtils.SetInfoMessage();
+//                    }
+//                }
+//                else
+//                if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+//                    isMaxRadiusUpLongPressed = false;
+//                    runCircleDetect();
+//                }
+//                return true;
+//            }
+//        });
+//        load_from_gallery_view.findViewById(R.id.btn_max_radius_down).setOnTouchListener(new View.OnTouchListener() {
+//            public boolean onTouch(View view, MotionEvent event) {
+//                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+//                    if (InstaCountUtils.maxRadius > 1) {
+//                        InstaCountUtils.maxRadius--;
+//                        InstaCountUtils.SetInfoMessage();
+//                    }
+//                }
+//                else
+//                if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+//                    runCircleDetect();
+//                }
+//                return true;
+//            }
+//        });
+
         return load_from_gallery_view;
     }
+
+//    private View.OnLongClickListener maxRadiusUpHoldListener = new View.OnLongClickListener() {
+//        @Override
+//        public boolean onLongClick(View pView) {
+//            isMaxRadiusUpLongPressed = true;
+//            return true;
+//        }
+//    };
+//
+//    private View.OnLongClickListener maxRadiusDownHoldListener = new View.OnLongClickListener() {
+//        @Override
+//        public boolean onLongClick(View pView) {
+//            isMaxRadiusDownLongPressed = true;
+//            return true;
+//        }
+//    };
 
     public void runCircleDetect() {
         if (mSelectedImage == null) {
@@ -275,7 +347,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
         Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
         img.setImageBitmap(bmp32);
     }
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult: requestCode = " + requestCode);
@@ -309,12 +381,14 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 if (chosenImage != null) {
                     String mSelectedImagePath = chosenImage.getFilePathOriginal();
                     Bitmap unscaledBitmap = ScalingUtilities.decodeFile(mSelectedImagePath, InstaCountUtils.mDstWidth, InstaCountUtils.mDstHeight, ScalingUtilities.ScalingLogic.FIT);
-                    if (unscaledBitmap.getHeight() > 1024 || unscaledBitmap.getWidth() > 1024) {
+                    if (unscaledBitmap.getHeight() > getResources().getDimensionPixelSize(R.dimen.destination_height) || unscaledBitmap.getWidth() > getResources().getDimensionPixelSize(R.dimen.destination_width)) {
                         mSelectedImage = ScalingUtilities.createScaledBitmap(unscaledBitmap, InstaCountUtils.mDstWidth, InstaCountUtils.mDstHeight, ScalingUtilities.ScalingLogic.FIT);
                         unscaledBitmap.recycle();
                     } else {
                         mSelectedImage = unscaledBitmap;
                     }
+                    load_from_gallery_view.findViewById(R.id.btn_detect_circles).setVisibility(View.VISIBLE);
+                    load_from_gallery_view.findViewById(R.id.btn_reset_image).setVisibility(View.VISIBLE);
                     runCircleDetect();
                 }
             }
