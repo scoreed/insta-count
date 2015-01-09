@@ -27,18 +27,25 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:screenOrientation="landscape">
+        android:theme="@style/AppTheme">
 
-        <activity android:name=".InstaCountMainActivity" android:label="@string/app_name" android:screenOrientation="landscape" >
+        <activity android:name=".InstaCountMainActivity"
+                  android:label="@string/app_name"/>
+
+        <activity
+            android:name=".CropActivity"
+            android:configChanges="keyboardHidden"
+            android:label="@string/app_name">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity>
 
-        <activity android:name=".CameraRTDetectFragment" android:screenOrientation="landscape" />
+        <activity android:name=".CameraRTDetectFragment" />
 
-        <activity android:name=".CropActivity" android:screenOrientation="landscape" />
-
-        <activity android:name=".TemplateSelectDialog" android:screenOrientation="landscape" />
+        <activity
+            android:name=".TemplateSelectDialog"
+            android:configChanges="keyboardHidden"
+            android:label="@string/sd_select_template_text"
+            android:theme="@android:style/Theme.Dialog"/>
 
     </application>
 

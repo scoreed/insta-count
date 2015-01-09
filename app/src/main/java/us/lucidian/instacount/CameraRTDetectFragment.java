@@ -66,6 +66,7 @@ The file is at:
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
@@ -420,12 +421,20 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             // try it, and set the screen text accordingly.
             // this text is shown at the end of each frame until 
             // 1.5 seconds has elapsed
-            if (SaveImage(InstaCountUtils.mRgba)) {
-                sShotText = "SCREENSHOT SAVED";
-            }
-            else {
-                sShotText = "SCREENSHOT FAILED";
-            }
+
+//            if (SaveImage(InstaCountUtils.mRgba)) {
+//                sShotText = "SCREENSHOT SAVED";
+//            }
+//            else {
+//                sShotText = "SCREENSHOT FAILED";
+//            }
+            sShotText = SaveImage(InstaCountUtils.mRgba);
+
+            Intent myIntent = new Intent(CameraRTDetectFragment.this, CropActivity.class);
+            myIntent.putExtra("filepath", sShotText);
+            CameraRTDetectFragment.this.startActivity(myIntent);
+
+            finish();
         }
         if (System.currentTimeMillis() - lMilliShotTime < 1500) ShowTitle(sShotText, 3, colorRed);
         return InstaCountUtils.mRgba;
@@ -437,7 +446,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
     }
 
     @SuppressLint("SimpleDateFormat")
-    public boolean SaveImage(Mat mat) {
+    public String SaveImage(Mat mat) {
         Imgproc.cvtColor(mat, InstaCountUtils.mIntermediateMat, Imgproc.COLOR_RGBA2BGR, 3);
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         String filename = "instacount_";
@@ -448,10 +457,9 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         filename += dateString + "-" + iFileOrdinal;
         filename += ".png";
         File file = new File(path, filename);
-        Boolean bool;
         filename = file.toString();
-        bool = Highgui.imwrite(filename, InstaCountUtils.mIntermediateMat);
-        return bool;
+        Highgui.imwrite(filename, InstaCountUtils.mIntermediateMat);
+        return filename;
     }
 
     private void ShowTitle(String s, int iLineNum, Scalar color) {

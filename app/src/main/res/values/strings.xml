@@ -30,7 +30,8 @@
     <string name="cp_template_contentDesc">Shape</string>
     <string name="cp_change_img_contentDesc">Change Image</string>
     <string name="cp_crop_button">Crop Image</string>
-    <string name="cp_template_button">Change Crop Shape</string>
+    <string name="cp_template_button">Crop Shape</string>
+    <string name="cp_detect_circles_contentDesc">Detect Circles</string>
 
     <!-- Select Dialog -->
     <string name="sd_select_template_text">Select Crop Shape</string>

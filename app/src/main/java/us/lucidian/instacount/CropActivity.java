@@ -1,64 +1,93 @@
 package us.lucidian.instacount;
 
-import java.lang.ref.WeakReference;
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import us.lucidian.instacount.gestures.MoveGestureDetector;
 import us.lucidian.instacount.gestures.RotateGestureDetector;
 
 public class CropActivity extends Activity implements OnTouchListener {
-    
+    private static final String TAG = "InstaCount::CropActivity";
     // Member fields.
-    private ImageView mImg;
-    private ImageView mTemplateImg;
-    private int mScreenWidth;
-    private int mScreenHeight;
-    private CropHandler mCropHandler;
+    private static ImageView      mImg;
+    private        ImageView      mTemplateImg;
+    private        int            mScreenWidth;
+    private        int            mScreenHeight;
+    private        CropHandler    mCropHandler;
     private static ProgressDialog mProgressDialog;
-    private int mSelectedVersion;
-    
-    private Matrix mMatrix = new Matrix();
-    private float mScaleFactor = 0.8f;
-    private float mRotationDegrees = 0.f;
-    private float mFocusX = 0.f;
-    private float mFocusY = 0.f;
-    private int mImageHeight, mImageWidth;
-    private ScaleGestureDetector mScaleDetector;
-    private RotateGestureDetector mRotateDetector;
-    private MoveGestureDetector mMoveDetector;
-    
+    private        int            mSelectedVersion;
+
+    private Matrix mMatrix          = new Matrix();
+    private float  mScaleFactor     = 0.8f;
+    private float  mRotationDegrees = 0.f;
+    private float  mFocusX          = 0.f;
+    private float  mFocusY          = 0.f;
+    private static int                   mImageHeight;
+    private static int                   mImageWidth;
+    private        ScaleGestureDetector  mScaleDetector;
+    private        RotateGestureDetector mRotateDetector;
+    private        MoveGestureDetector   mMoveDetector;
+
     private int mTemplateWidth;
     private int mTemplateHeight;
-    
+
+    private        TextView tv_circle_count;
+    private static Bitmap   mSelectedImage;
+
     // Constants
-    public static final int MEDIA_GALLERY = 1;
-    public static final int TEMPLATE_SELECTION = 2;
-    public static final int DISPLAY_IMAGE = 3;
-    
-    private final static int IMG_MAX_SIZE = 1000;
-    private final static int IMG_MAX_SIZE_MDPI = 400;
+    public static final  int MEDIA_GALLERY      = 1;
+    public static final  int TEMPLATE_SELECTION = 2;
+    public static final  int DISPLAY_IMAGE      = 3;
+    private final static int IMG_MAX_SIZE       = 1000;
+    private final static int IMG_MAX_SIZE_MDPI  = 400;
+
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                }
+                break;
+                default: {
+                    super.onManagerConnected(status);
+                }
+                break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,22 +95,35 @@ public class CropActivity extends Activity implements OnTouchListener {
         setContentView(R.layout.activity_crop);
 
         mSelectedVersion = InstaCountMainActivity.VERSION_1;
-        //mSelectedVersion = getIntent().getExtras().getInt(InstaCountMainActivity.CROP_VERSION_SELECTED_KEY, -1);
-        
+
         mImg = (ImageView) findViewById(R.id.cp_img);
         mTemplateImg = (ImageView) findViewById(R.id.cp_face_template);
         mImg.setOnTouchListener(this);
-        
+
+        String filePath;
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if (extras == null) {
+                filePath = null;
+            }
+            else {
+                filePath = extras.getString("filepath");
+            }
+        }
+        else {
+            filePath = (String) savedInstanceState.getSerializable("filepath");
+        }
+
         // Get screen size in pixels.
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenHeight = metrics.heightPixels;
         mScreenWidth = metrics.widthPixels;
-        
+
         Bitmap faceTemplate = BitmapFactory.decodeResource(getResources(), R.drawable.crop_square);
         mTemplateWidth = faceTemplate.getWidth();
         mTemplateHeight = faceTemplate.getHeight();
-        
+
         // Set template image accordingly to device screen size.
         if (mScreenWidth == 320 && mScreenHeight == 480) {
             mTemplateWidth = 218;
@@ -89,13 +131,16 @@ public class CropActivity extends Activity implements OnTouchListener {
             faceTemplate = Bitmap.createScaledBitmap(faceTemplate, mTemplateWidth, mTemplateHeight, true);
             mTemplateImg.setImageBitmap(faceTemplate);
         }
-        
-        // Load temp image.
-        Bitmap photoImg = BitmapFactory.decodeResource(getResources(), R.drawable.default_stacked_pipes);
-        mImg.setImageBitmap(photoImg);
-        mImageHeight = photoImg.getHeight();
-        mImageWidth = photoImg.getWidth();
-        
+
+        if (filePath == null) {
+            // Load temp image.
+            mSelectedImage = BitmapFactory.decodeResource(getResources(), R.drawable.default_stacked_pipes);
+            mImg.setImageBitmap(mSelectedImage);
+            mImageHeight = mSelectedImage.getHeight();
+            mImageWidth = mSelectedImage.getWidth();
+        }
+        else setSelectedImage(filePath);
+
         // View is scaled by matrix, so scale initially
         mMatrix.postScale(mScaleFactor, mScaleFactor);
         mImg.setImageMatrix(mMatrix);
@@ -107,8 +152,154 @@ public class CropActivity extends Activity implements OnTouchListener {
         
         // Instantiate Thread Handler.
         mCropHandler = new CropHandler(this);
+
+
+        InstaCountUtils.mDstWidth = getResources().getDimensionPixelSize(R.dimen.destination_width);
+        InstaCountUtils.mDstHeight = getResources().getDimensionPixelSize(R.dimen.destination_height);
+
+        InstaCountUtils.LoadSharedPreferences(CropActivity.this);
+
+        tv_circle_count = (TextView)findViewById(R.id.tv_circle_count);
+
+        FloatingActionButton btn_blur_up = (FloatingActionButton) findViewById(R.id.btn_blur_up);
+        FloatingActionButton btn_blur_down = (FloatingActionButton) findViewById(R.id.btn_blur_down);
+        FloatingActionButton btn_canny_up = (FloatingActionButton) findViewById(R.id.btn_canny_up);
+        FloatingActionButton btn_canny_down = (FloatingActionButton) findViewById(R.id.btn_canny_down);
+        FloatingActionButton btn_accum_up = (FloatingActionButton) findViewById(R.id.btn_accum_up);
+        FloatingActionButton btn_accum_down = (FloatingActionButton) findViewById(R.id.btn_accum_down);
+        FloatingActionButton btn_min_distance_up = (FloatingActionButton) findViewById(R.id.btn_min_distance_up);
+        FloatingActionButton btn_min_distance_down = (FloatingActionButton) findViewById(R.id.btn_min_distance_down);
+        FloatingActionButton btn_min_radius_up = (FloatingActionButton) findViewById(R.id.btn_min_radius_up);
+        FloatingActionButton btn_min_radius_down = (FloatingActionButton) findViewById(R.id.btn_min_radius_down);
+        FloatingActionButton btn_max_radius_up = (FloatingActionButton) findViewById(R.id.btn_max_radius_up);
+        FloatingActionButton btn_max_radius_down = (FloatingActionButton) findViewById(R.id.btn_max_radius_down);
+
+        btn_blur_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.blurSize <= InstaCountUtils.maxBlurSize) {
+                    InstaCountUtils.blurSize += 2;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_blur_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.blurSize >= 3) {
+                    InstaCountUtils.blurSize -= 2;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_canny_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.cannyThreshold <= InstaCountUtils.maxCannyThreshold) {
+                    InstaCountUtils.cannyThreshold++;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_canny_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.cannyThreshold > 1) {
+                    InstaCountUtils.cannyThreshold--;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_accum_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.accumulatorThreshold <= InstaCountUtils.maxAccumulatorThreshold) {
+                    InstaCountUtils.accumulatorThreshold++;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_accum_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.accumulatorThreshold > 1) {
+                    InstaCountUtils.accumulatorThreshold--;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_min_distance_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minDistance <= InstaCountUtils.maxMinDistance) {
+                    InstaCountUtils.minDistance++;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_min_distance_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minDistance > 1) {
+                    InstaCountUtils.minDistance--;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_min_radius_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minRadius <= InstaCountUtils.maxMinRadius) {
+                    InstaCountUtils.minRadius++;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_min_radius_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.minRadius > 1) {
+                    InstaCountUtils.minRadius--;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_max_radius_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.maxRadius <= InstaCountUtils.maxMaxRadius) {
+                    InstaCountUtils.maxRadius++;
+                    runCircleDetect();
+                }
+            }
+        });
+        btn_max_radius_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (InstaCountUtils.maxRadius > 1) {
+                    InstaCountUtils.maxRadius--;
+                    runCircleDetect();
+                }
+            }
+        });
     }
-    
+
+    public void runCircleDetect() {
+        if (mSelectedImage == null) {
+            ((TextView)findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            return;
+        }
+        InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+        InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
+        Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+        Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
+        Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
+        tv_circle_count.setText(InstaCountUtils.DetectCircles(CropActivity.this));
+        bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
+        mImg.setImageBitmap(bmp32);
+    }
+
     public void onCropImageButton(View v) {
         // Create progress dialog and display it.
         mProgressDialog = new ProgressDialog(v.getContext());
@@ -162,12 +353,21 @@ public class CropActivity extends Activity implements OnTouchListener {
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, MEDIA_GALLERY);
     }
-    
+
+    public void onCameraCaptureButton(View view) throws IOException {
+        Intent myIntent = new Intent(CropActivity.this, CameraRTDetectFragment.class);
+        CropActivity.this.startActivity(myIntent);
+        finish();
+    }
+
     /*
      * Adjust the size of bitmap before loading it to memory.
      * This will help the phone by not taking up a lot memory.
      */
     private void setSelectedImage(String path) {
+
+        Log.i(TAG, path);
+
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
@@ -178,10 +378,10 @@ public class CropActivity extends Activity implements OnTouchListener {
         }
         
         options.inJustDecodeBounds = false;
-        Bitmap photoImg = BitmapFactory.decodeFile(path, options);
-        mImageHeight = photoImg.getHeight();
-        mImageWidth = photoImg.getWidth();
-        mImg.setImageBitmap(photoImg);
+        mSelectedImage = BitmapFactory.decodeFile(path, options);
+        mImageHeight = mSelectedImage.getHeight();
+        mImageWidth = mSelectedImage.getWidth();
+        mImg.setImageBitmap(mSelectedImage);
     }
 
     /*
@@ -230,36 +430,42 @@ public class CropActivity extends Activity implements OnTouchListener {
             } else if (requestCode == TEMPLATE_SELECTION) {
                 int pos = data.getExtras().getInt(TemplateSelectDialog.POSITION);
                 Bitmap templateImg = null;
-                
+
                 // Change template according to what the user has selected.
-                switch(pos) {
-                case 0:
-                    templateImg = BitmapFactory.decodeResource(getResources(), R.drawable.crop_square);
-                    break;
-                case 1:
-                    templateImg = BitmapFactory.decodeResource(getResources(), R.drawable.crop_circle);
-                    break;
+                switch (pos) {
+                    case 0:
+                        templateImg = BitmapFactory.decodeResource(getResources(), R.drawable.crop_square);
+                        break;
+                    case 1:
+                        templateImg = BitmapFactory.decodeResource(getResources(), R.drawable.crop_rectangle);
+                        break;
+                    case 2:
+                        templateImg = BitmapFactory.decodeResource(getResources(), R.drawable.crop_circle);
+                        break;
                 }
 
                 if (templateImg != null) {
                     mTemplateWidth = templateImg.getWidth();
                     mTemplateHeight = templateImg.getHeight();
+                    // Resize template if necessary.
+                    if (mScreenWidth == 320 && mScreenHeight == 480) {
+                        mTemplateWidth = 218;
+                        mTemplateHeight = 300;
+                        templateImg = Bitmap.createScaledBitmap(templateImg, mTemplateWidth, mTemplateHeight, true);
+                    }
+                    mTemplateImg.setImageBitmap(templateImg);
                 }
-
-                // Resize template if necessary.
-                if (mScreenWidth == 320 && mScreenHeight == 480) {
-                    mTemplateWidth = 218;
-                    mTemplateHeight = 300;
-                    templateImg = Bitmap.createScaledBitmap(templateImg, mTemplateWidth, mTemplateHeight, true);
-                }
-                mTemplateImg.setImageBitmap(templateImg);
             }
         }
     }
-    
+
+    public void onDetectCirclesButton(View view) {
+        runCircleDetect();
+    }
+
     private static class CropHandler extends Handler {
         WeakReference<CropActivity> mThisCA;
-        
+
         CropHandler(CropActivity ca) {
             mThisCA = new WeakReference<>(ca);
         }
@@ -267,28 +473,27 @@ public class CropActivity extends Activity implements OnTouchListener {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            
-            CropActivity ca = mThisCA.get();
+
             if (msg.what == DISPLAY_IMAGE) {
                 mProgressDialog.dismiss();
+
                 Bitmap cropImg = (Bitmap) msg.obj;
-                
-                // Setup an AlertDialog to display cropped image.
-                AlertDialog.Builder builder = new AlertDialog.Builder(ca);
-                builder.setTitle("Final Cropped Image");
-                builder.setIcon(new BitmapDrawable(ca.getResources(), cropImg));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                      public void onClick(DialogInterface dialog, int id) {
-                          dialog.cancel();
-                      }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
+
+                if (cropImg.getHeight() > 1024 || cropImg.getWidth() > 1024) {
+                    mSelectedImage = ScalingUtilities.createScaledBitmap(cropImg, InstaCountUtils.mDstWidth, InstaCountUtils.mDstHeight, ScalingUtilities.ScalingLogic.FIT);
+                    cropImg.recycle();
+                } else {
+                    mSelectedImage = cropImg;
+                }
+
+//                mSelectedImage = cropImg.copy(Bitmap.Config.ARGB_8888, true);
+                mImageHeight = mSelectedImage.getHeight();
+                mImageWidth = mSelectedImage.getWidth();
+                mImg.setImageBitmap(mSelectedImage);
             }
         }
     }
-    
-    
+
     public boolean onTouch(View v, MotionEvent event) {
         mScaleDetector.onTouchEvent(event);
         mRotateDetector.onTouchEvent(event);
@@ -306,7 +511,7 @@ public class CropActivity extends Activity implements OnTouchListener {
         view.setImageMatrix(mMatrix);
         return true;
     }
-    
+
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
@@ -335,4 +540,18 @@ public class CropActivity extends Activity implements OnTouchListener {
             return true;
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, CropActivity.this, mLoaderCallback);
+    }
+
+    @Override
+    public void onPause() { super.onPause(); InstaCountUtils.SaveSharedPreferences(CropActivity.this); }
+
+    @Override
+    public void onStop() { super.onStop(); InstaCountUtils.SaveSharedPreferences(CropActivity.this); }
+
+    public void onDestroy() { super.onDestroy(); InstaCountUtils.SaveSharedPreferences(CropActivity.this); }
 }

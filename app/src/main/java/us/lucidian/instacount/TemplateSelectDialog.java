@@ -17,9 +17,9 @@ import android.widget.TextView;
 
 public class TemplateSelectDialog extends Activity {
 
-    public static final String POSITION = "POSITION";
-    public static final String[] FACE_TEMPLATE_TEXT = new String[] { "Square", "Circle" };
-    public static final Integer[] FACE_TEMPLATE_IMAGE = new Integer[] { R.drawable.crop_square, R.drawable.crop_circle };
+    public static final String    POSITION            = "POSITION";
+    public static final String[]  CROP_TEMPLATE_TEXT  = new String[]{"Square", "Rectangle", "Circle"};
+    public static final Integer[] CROP_TEMPLATE_IMAGE = new Integer[]{R.drawable.crop_square, R.drawable.crop_rectangle, R.drawable.crop_circle};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,13 +27,13 @@ public class TemplateSelectDialog extends Activity {
 
         // Setup the window
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.select_dialog);
+        setContentView(R.layout.template_select_dialog);
 
         // Set result CANCELED in-case the user backs out
         setResult(Activity.RESULT_CANCELED);
 
-        ListView mListView = (ListView) findViewById(R.id.select_list);
-        mListView.setAdapter(new FaceTemplateListViewAdapter(this, FACE_TEMPLATE_TEXT, FACE_TEMPLATE_IMAGE));
+        ListView mListView = (ListView) findViewById(R.id.template_select_list);
+        mListView.setAdapter(new CropTemplateListViewAdapter(this, CROP_TEMPLATE_TEXT, CROP_TEMPLATE_IMAGE));
         mListView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -48,13 +48,13 @@ public class TemplateSelectDialog extends Activity {
     }
     
     // Adapter that will setup the layout of each line in ListView.
-    private class FaceTemplateListViewAdapter extends BaseAdapter {
+    private class CropTemplateListViewAdapter extends BaseAdapter {
         private Context mmContext;
         private String[] mmTypes;
         private Integer[] mmImages;
         private LayoutInflater layoutInflator;
 
-        public FaceTemplateListViewAdapter(Context context, String[] types, Integer[] imgs) {
+        public CropTemplateListViewAdapter(Context context, String[] types, Integer[] imgs) {
             mmContext = context;
             mmTypes = types;
             mmImages = imgs;

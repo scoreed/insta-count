@@ -49,7 +49,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
     private static final int                SELECT_PICTURE        = 1;
     private static final int                SELECT_PICTURE_KITKAT = 2;
     private View                load_from_gallery_view;
-    private ImageView           img;
+    private ImageView           mImg;
     private TextView            tv_circle_count;
     private Bitmap              mSelectedImage;
     private ImageChooserManager imageChooserManager;
@@ -96,7 +96,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
         InstaCountUtils.LoadSharedPreferences(getActivity());
 
         tv_circle_count = (TextView) load_from_gallery_view.findViewById(R.id.tv_circle_count);
-        img = (ImageView) load_from_gallery_view.findViewById(R.id.ImageView01);
+        mImg = (ImageView) load_from_gallery_view.findViewById(R.id.ImageView01);
 
         load_from_gallery_view.findViewById(R.id.btn_browse_gallery).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,7 +124,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
                 if (mSelectedImage == null) return;
                 tv_circle_count.setText(InstaCountUtils.SetInfoMessage());
                 Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
-                img.setImageBitmap(bmp32);
+                mImg.setImageBitmap(bmp32);
             }
         });
 
@@ -148,7 +148,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
 //                    Imgproc.cvtColor(InstaCountUtils.mIntermediateMat, InstaCountUtils.mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
 //                    bmp32 = Bitmap.createBitmap(InstaCountUtils.mRgba.cols(), InstaCountUtils.mRgba.rows(), Bitmap.Config.ARGB_8888);
 //                    Utils.matToBitmap(InstaCountUtils.mRgba, bmp32);
-//                    img.setImageBitmap(bmp32);
+//                    mImg.setImageBitmap(bmp32);
 //                }
 //                catch (Exception e) {
 //                    Log.e(TAG, "load_from_gallery_view canny: Exception = " + e.getMessage());
@@ -157,7 +157,6 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
 //        });
         
         ((TextView)load_from_gallery_view.findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
-
 
         btn_blur_up = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_blur_up);
         btn_blur_down = (FloatingActionButton)load_from_gallery_view.findViewById(R.id.btn_blur_down);
@@ -345,7 +344,7 @@ public class LoadFromGalleryFragment extends Fragment implements ImageChooserLis
         tv_circle_count.setText(InstaCountUtils.DetectCircles(getActivity()));
         bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
-        img.setImageBitmap(bmp32);
+        mImg.setImageBitmap(bmp32);
     }
 
     @Override

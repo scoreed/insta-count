@@ -97,7 +97,7 @@ public class ImageProcess {
             // Check bottom-left section of combineImage.
             for (int x = wMid; x >= 0; x--) {
 
-                if (x2 < 0 || y2 >= finalBm.getHeight()) {  break; }
+                if (x2 < 0 || y2 >= finalBm.getHeight() || y >= bm.getHeight()) {  break; }
 
                 int px = bm.getPixel(x, y);
                 if (Color.red(px) == 234 && Color.green(px) == 157 && Color.blue(px) == 33) {
@@ -116,7 +116,7 @@ public class ImageProcess {
             template = false;
             for (int x = wMid; x < bm.getWidth(); x++) {
 
-                if (x2 >= finalBm.getWidth() || y2 >= finalBm.getHeight()) { break; }
+                if (x2 >= finalBm.getWidth() || y2 >= finalBm.getHeight() || y >= bm.getHeight()) { break; }
 
                 int px = bm.getPixel(x, y);
                 if (Color.red(px) == 234 && Color.green(px) == 157 && Color.blue(px) == 33) {
@@ -132,7 +132,7 @@ public class ImageProcess {
 
             // Once we reach the bottom-most part on the template line, set pixel value transparent
             // from that point on.
-            if (y < finalBm.getHeight()) {
+            if (y < bm.getHeight()) {
                 int px = bm.getPixel(wMid, y);
                 if (Color.red(px) == 234 && Color.green(px) == 157 && Color.blue(px) == 33) {
                     for (int y3 = y2; y3 < finalBm.getHeight(); y3++) {
@@ -249,6 +249,7 @@ public class ImageProcess {
             // Check bottom-right section of combineImage.
             x2 = wfMid;
             for (int x = wMid; x < bm.getWidth(); x++) {
+
                 if (x2 >= finalBm.getWidth() || y2 >= finalBm.getHeight()) { break; }
                 
                 int px = bm.getPixel(x, y);
@@ -261,7 +262,7 @@ public class ImageProcess {
                 x2++;
             }
                 // Get out of loop once it hits bottom most part of the template.
-            if (y < finalBm.getHeight()) {
+            if (y < bm.getHeight()) {
                 int px = bm.getPixel(wMid, y);
                 if (Color.red(px) == 234 && Color.green(px) == 157 && Color.blue(px) == 33) {
                     break;
