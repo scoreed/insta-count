@@ -22,6 +22,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.appkilt.client.AppKilt;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -545,10 +546,15 @@ public class CropActivity extends Activity implements OnTouchListener {
     public void onResume() {
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, CropActivity.this, mLoaderCallback);
+        AppKilt.onUpdateableActivityResume(this);
     }
 
     @Override
-    public void onPause() { super.onPause(); InstaCountUtils.SaveSharedPreferences(CropActivity.this); }
+    public void onPause() {
+        super.onPause();
+        InstaCountUtils.SaveSharedPreferences(CropActivity.this);
+        AppKilt.onUpdateableActivityPause();
+    }
 
     @Override
     public void onStop() { super.onStop(); InstaCountUtils.SaveSharedPreferences(CropActivity.this); }
