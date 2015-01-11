@@ -8,6 +8,7 @@
     <string name="title_section4">Settings</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_reset_settings">Reset Settings</string>
     <string name="action_logout">Exit</string>
 
     <string name="default_min_distance">20</string>
@@ -32,6 +33,7 @@
     <string name="cp_crop_button">Crop Image</string>
     <string name="cp_template_button">Crop Shape</string>
     <string name="cp_detect_circles_contentDesc">Detect Circles</string>
+    <string name="cp_clear_image_contentDesc">Clear Image</string>
 
     <!-- Select Dialog -->
     <string name="sd_select_template_text">Select Crop Shape</string>

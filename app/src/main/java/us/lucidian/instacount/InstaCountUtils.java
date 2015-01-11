@@ -170,7 +170,18 @@ public class InstaCountUtils {
         edt.putString("accumulator_threshold", Integer.toString(accumulatorThreshold));
         edt.commit();
     }
-    
+
+    public static void ResetSharedPreferences(Activity activity) {
+        Log.i(TAG, "ResetSharedPreferences Called");
+
+        blurSize = Integer.parseInt(activity.getString(R.string.default_blur_size));
+        minDistance = Integer.parseInt(activity.getString(R.string.default_min_distance));
+        minRadius = Integer.parseInt(activity.getString(R.string.default_min_radius));
+        maxRadius = Integer.parseInt(activity.getString(R.string.default_max_radius));
+        cannyThreshold = Integer.parseInt(activity.getString(R.string.default_canny_threshold));
+        accumulatorThreshold = Integer.parseInt(activity.getString(R.string.default_accumulator_threshold));
+    }
+
     public static void DrawRectangle() {
         resizedRgba = mRgba.clone();
         Core.rectangle(resizedRgba, new Point(10,10), new Point(mRgba.cols()/2.0,mRgba.rows()/2.0), new Scalar(0,0,255),0,8,0);

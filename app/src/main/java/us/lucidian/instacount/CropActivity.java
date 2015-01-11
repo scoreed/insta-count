@@ -1,6 +1,5 @@
 package us.lucidian.instacount;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,8 +12,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -39,7 +42,7 @@ import java.lang.ref.WeakReference;
 import us.lucidian.instacount.gestures.MoveGestureDetector;
 import us.lucidian.instacount.gestures.RotateGestureDetector;
 
-public class CropActivity extends Activity implements OnTouchListener {
+public class CropActivity extends ActionBarActivity implements OnTouchListener {
     private static final String TAG = "InstaCount::CropActivity";
     // Member fields.
     private static ImageView      mImg;
@@ -64,6 +67,7 @@ public class CropActivity extends Activity implements OnTouchListener {
     private int mTemplateWidth;
     private int mTemplateHeight;
 
+    private boolean showCircles = true;
     private        TextView tv_circle_count;
     private static Bitmap   mSelectedImage;
 
@@ -133,14 +137,9 @@ public class CropActivity extends Activity implements OnTouchListener {
             mTemplateImg.setImageBitmap(faceTemplate);
         }
 
-        if (filePath == null) {
-            // Load temp image.
-            mSelectedImage = BitmapFactory.decodeResource(getResources(), R.drawable.default_stacked_pipes);
-            mImg.setImageBitmap(mSelectedImage);
-            mImageHeight = mSelectedImage.getHeight();
-            mImageWidth = mSelectedImage.getWidth();
+        if (filePath != null) {
+            setSelectedImage(filePath);
         }
-        else setSelectedImage(filePath);
 
         // View is scaled by matrix, so scale initially
         mMatrix.postScale(mScaleFactor, mScaleFactor);
@@ -153,7 +152,6 @@ public class CropActivity extends Activity implements OnTouchListener {
         
         // Instantiate Thread Handler.
         mCropHandler = new CropHandler(this);
-
 
         InstaCountUtils.mDstWidth = getResources().getDimensionPixelSize(R.dimen.destination_width);
         InstaCountUtils.mDstHeight = getResources().getDimensionPixelSize(R.dimen.destination_height);
@@ -283,6 +281,7 @@ public class CropActivity extends Activity implements OnTouchListener {
                 }
             }
         });
+        ((TextView)findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
     }
 
     public void runCircleDetect() {
@@ -290,18 +289,28 @@ public class CropActivity extends Activity implements OnTouchListener {
             ((TextView)findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
             return;
         }
-        InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
-        InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
-        Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
-        Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
-        Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
-        tv_circle_count.setText(InstaCountUtils.DetectCircles(CropActivity.this));
-        bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
-        mImg.setImageBitmap(bmp32);
+
+        if (showCircles) {
+            InstaCountUtils.mRgba = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC4);
+            InstaCountUtils.mGray = new Mat(mSelectedImage.getHeight(), mSelectedImage.getWidth(), CvType.CV_8UC1);
+            Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+            Utils.bitmapToMat(bmp32, InstaCountUtils.mRgba);
+            Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_BGR2GRAY, 1);
+            tv_circle_count.setText(InstaCountUtils.DetectCircles(CropActivity.this));
+            bmp32 = Bitmap.createBitmap(InstaCountUtils.resizedRgba.cols(), InstaCountUtils.resizedRgba.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(InstaCountUtils.resizedRgba, bmp32);
+            mImg.setImageBitmap(bmp32);
+        } else if (InstaCountUtils.mRgba != null && InstaCountUtils.mRgba.cols() > 0 && InstaCountUtils.mRgba.rows() > 0) {
+            Bitmap bmp32 = mSelectedImage.copy(Bitmap.Config.ARGB_8888, true);
+            mImg.setImageBitmap(bmp32);
+        }
     }
 
     public void onCropImageButton(View v) {
+        if (mSelectedImage == null) {
+            ((TextView)findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+            return;
+        }
         // Create progress dialog and display it.
         mProgressDialog = new ProgressDialog(v.getContext());
         mProgressDialog.setCancelable(false);
@@ -358,7 +367,6 @@ public class CropActivity extends Activity implements OnTouchListener {
     public void onCameraCaptureButton(View view) throws IOException {
         Intent myIntent = new Intent(CropActivity.this, CameraRTDetectFragment.class);
         CropActivity.this.startActivity(myIntent);
-        finish();
     }
 
     /*
@@ -462,6 +470,12 @@ public class CropActivity extends Activity implements OnTouchListener {
 
     public void onDetectCirclesButton(View view) {
         runCircleDetect();
+        showCircles = !showCircles;
+    }
+
+    public void onClearImageButton(View view) {
+        mSelectedImage = null;
+        mImg.setImageDrawable(null);
     }
 
     private static class CropHandler extends Handler {
@@ -540,6 +554,31 @@ public class CropActivity extends Activity implements OnTouchListener {
 
             return true;
         }
+    }
+
+    public void restoreActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.crop_activity_menu, menu);
+        restoreActionBar();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_logout) {
+            finish();
+        } else if (id == R.id.action_reset_settings) {
+            InstaCountUtils.ResetSharedPreferences(CropActivity.this);
+            ((TextView)findViewById(R.id.tv_circle_count)).setText(InstaCountUtils.SetInfoMessage());
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

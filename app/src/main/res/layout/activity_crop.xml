@@ -24,14 +24,15 @@
         android:layout_height="fill_parent"
         android:layout_below="@+id/tv_circle_count"
         android:layout_above="@+id/footer"
-        android:gravity="center_vertical">
+        android:gravity="center"
+        android:background="@drawable/image_placeholder">
 
         <ImageView
             android:id="@+id/cp_img"
             android:contentDescription="@string/cp_image_contentDesc"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:scaleType="matrix" />
+            android:scaleType="matrix"/>
 
         <ImageView
             android:id="@+id/cp_face_template"
@@ -60,15 +61,6 @@
         android:layout_marginEnd="8dp">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_min_distance_down"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_icon="@drawable/min_dist_down"
-            fab:fab_colorNormal="@color/min_dist"
-            fab:fab_colorPressed="@color/min_dist_pressed"/>
-
-        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_distance_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -78,13 +70,13 @@
             fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_min_radius_down"
+            android:id="@+id/btn_min_distance_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_icon="@drawable/min_radius_down"
-            fab:fab_colorNormal="@color/min_radius"
-            fab:fab_colorPressed="@color/min_radius_pressed"/>
+            fab:fab_icon="@drawable/min_dist_down"
+            fab:fab_colorNormal="@color/min_dist"
+            fab:fab_colorPressed="@color/min_dist_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_min_radius_up"
@@ -96,13 +88,13 @@
             fab:fab_colorPressed="@color/min_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_max_radius_down"
+            android:id="@+id/btn_min_radius_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
-            fab:fab_icon="@drawable/max_radius_down"
-            fab:fab_colorNormal="@color/max_radius"
-            fab:fab_colorPressed="@color/max_radius_pressed"/>
+            fab:fab_icon="@drawable/min_radius_down"
+            fab:fab_colorNormal="@color/min_radius"
+            fab:fab_colorPressed="@color/min_radius_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_max_radius_up"
@@ -110,6 +102,15 @@
             android:layout_height="wrap_content"
             fab:fab_size="mini"
             fab:fab_icon="@drawable/max_radius_up"
+            fab:fab_colorNormal="@color/max_radius"
+            fab:fab_colorPressed="@color/max_radius_pressed"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_max_radius_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_size="mini"
+            fab:fab_icon="@drawable/max_radius_down"
             fab:fab_colorNormal="@color/max_radius"
             fab:fab_colorPressed="@color/max_radius_pressed"/>
 
@@ -234,6 +235,15 @@
 
         <ImageButton
             android:id="@+id/imageButton4"
+            android:contentDescription="@string/cp_clear_image_contentDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_clear_image"
+            android:onClick="onClearImageButton"/>
+
+        <ImageButton
+            android:id="@+id/imageButton5"
             android:contentDescription="@string/cp_detect_circles_contentDesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

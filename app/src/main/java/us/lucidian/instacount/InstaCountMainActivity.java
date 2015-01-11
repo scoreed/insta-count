@@ -20,10 +20,10 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
     private LoadFromCameraFragment  loadFromCameraFragment  = LoadFromCameraFragment.newInstance(1);
     private SettingsFragment        settingsFragment        = SettingsFragment.newInstance(1);
 
-    public static final String CROP_VERSION_SELECTED_KEY = "crop";
+//    public static final String CROP_VERSION_SELECTED_KEY = "crop";
 
     public static final int VERSION_1 = 1;
-    public static final int VERSION_2 = 2;
+//    public static final int VERSION_2 = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
