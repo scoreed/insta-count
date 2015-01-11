@@ -8,7 +8,7 @@
                 android:focusable="false"
                 android:focusableInTouchMode="true"
                 android:screenOrientation="landscape"
-                tools:context="us.lucidian.instacount.CameraRTDetectFragment">
+                tools:context="us.lucidian.instacount.CameraRTDetectActivity">
     <TextView
         android:id="@+id/tv_info"
         android:layout_width="fill_parent"
@@ -44,7 +44,7 @@
         fab:fab_addButtonColorNormal="@color/white"
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"
-        fab:fab_expandDirection="left"
+        fab:fab_expandDirection="up"
         fab:fab_size="mini"
         android:layout_marginBottom="50dp"
         android:layout_marginRight="8dp"
@@ -116,7 +116,7 @@
         fab:fab_addButtonColorNormal="@color/white"
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"
-        fab:fab_expandDirection="right"
+        fab:fab_expandDirection="up"
         fab:fab_size="mini"
         android:layout_marginBottom="45dp"
         android:layout_marginLeft="8dp"

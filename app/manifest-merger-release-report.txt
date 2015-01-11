@@ -117,7 +117,7 @@ category#android.intent.category.LAUNCHER
 ADDED from AndroidManifest.xml:39:80
 	android:name
 		ADDED from AndroidManifest.xml:39:90
-activity#us.lucidian.instacount.CameraRTDetectFragment
+activity#us.lucidian.instacount.CameraRTDetectActivity
 ADDED from AndroidManifest.xml:42:9
 	android:name
 		ADDED from AndroidManifest.xml:42:19

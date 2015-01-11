@@ -198,7 +198,7 @@
         style="?android:attr/buttonBarStyle" >
 
         <ImageButton
-            android:id="@+id/imageButton0"
+            android:id="@+id/btn_camera_capture"
             android:contentDescription="@string/cp_change_img_contentDesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -207,7 +207,7 @@
             android:onClick="onCameraCaptureButton"/>
 
         <ImageButton
-            android:id="@+id/imageButton1"
+            android:id="@+id/btn_image_gallery"
             android:contentDescription="@string/cp_change_img_contentDesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -216,7 +216,7 @@
             android:onClick="onChangeImageButton"/>
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/btn_image_crop"
             android:contentDescription="@string/cp_crop_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -225,7 +225,7 @@
             android:onClick="onCropImageButton"/>
 
         <ImageButton
-            android:id="@+id/imageButton3"
+            android:id="@+id/btn_image_crop_shape"
             android:contentDescription="@string/cp_template_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -234,7 +234,7 @@
             android:onClick="onChangeTemplateButton"/>
 
         <ImageButton
-            android:id="@+id/imageButton4"
+            android:id="@+id/btn_clear_image"
             android:contentDescription="@string/cp_clear_image_contentDesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -243,7 +243,7 @@
             android:onClick="onClearImageButton"/>
 
         <ImageButton
-            android:id="@+id/imageButton5"
+            android:id="@+id/btn_detect_circles"
             android:contentDescription="@string/cp_detect_circles_contentDesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

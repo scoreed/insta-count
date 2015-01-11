@@ -75,7 +75,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
@@ -98,12 +97,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-public class CameraRTDetectFragment extends Activity implements CvCameraViewListener {
+public class CameraRTDetectActivity extends Activity implements CvCameraViewListener {
     public static final  int    VIEW_MODE_RGBA         = 0;
     public static        int    viewMode               = VIEW_MODE_RGBA;
     public static final  int    VIEW_MODE_HOUGHCIRCLES = 1;
     public static final  int    VIEW_MODE_CANNY        = 3;
-    private static final String TAG                    = "InstaCount::CameraRTDetectFragment";
+    private static final String TAG                    = "InstaCount::CameraRTDetectActivity";
     private static final String ARG_SECTION_NUMBER     = "section_number";
     public int iCannyLowerThreshold;
     public  int     iCircleCount = 0;
@@ -139,7 +138,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
         super.onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.fragment_camerartdetect);
+        setContentView(R.layout.activity_camerartdetect);
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.java_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_4, this, mLoaderCallback);
@@ -177,32 +176,18 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             }
         });
 
-        InstaCountUtils.LoadSharedPreferences(this);
+        InstaCountUtils.LoadSharedPreferences(CameraRTDetectActivity.this);
 
         info.setText(InstaCountUtils.SetInfoMessage());
         left_actions = ((FloatingActionsMenu)findViewById(R.id.left_actions));
         right_actions = ((FloatingActionsMenu)findViewById(R.id.right_actions));
-
-        findViewById(R.id.left_actions).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(CameraRTDetectFragment.this, "Clicked left_actions", Toast.LENGTH_SHORT).show();
-                if (left_actions.isExpanded()) { right_actions.collapse(); }
-            }
-        });
-        findViewById(R.id.right_actions).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(CameraRTDetectFragment.this, "Clicked right_actions", Toast.LENGTH_SHORT).show();
-                if (right_actions.isExpanded()) { left_actions.collapse(); }
-            }
-        });
 
         findViewById(R.id.btn_blur_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (InstaCountUtils.blurSize <= InstaCountUtils.maxBlurSize) {
                     InstaCountUtils.blurSize += 2;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -211,6 +196,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.blurSize >= 3) {
                     InstaCountUtils.blurSize -= 2;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -219,6 +205,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.cannyThreshold <= InstaCountUtils.maxCannyThreshold) {
                     InstaCountUtils.cannyThreshold++;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -227,6 +214,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.cannyThreshold > 1) {
                     InstaCountUtils.cannyThreshold--;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -235,6 +223,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.accumulatorThreshold <= InstaCountUtils.maxAccumulatorThreshold) {
                     InstaCountUtils.accumulatorThreshold++;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -243,6 +232,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.accumulatorThreshold > 1) {
                     InstaCountUtils.accumulatorThreshold--;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -251,6 +241,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.minDistance <= InstaCountUtils.maxMinDistance) {
                     InstaCountUtils.minDistance++;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -259,6 +250,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.minDistance > 1) {
                     InstaCountUtils.minDistance--;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -267,6 +259,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.minRadius <= InstaCountUtils.maxMinRadius) {
                     InstaCountUtils.minRadius++;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -275,6 +268,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.minRadius > 1) {
                     InstaCountUtils.minRadius--;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -283,6 +277,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.maxRadius <= InstaCountUtils.maxMaxRadius) {
                     InstaCountUtils.maxRadius++;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -291,6 +286,7 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
             public void onClick(View v) {
                 if (InstaCountUtils.maxRadius > 1) {
                     InstaCountUtils.maxRadius--;
+                    if (viewMode != VIEW_MODE_HOUGHCIRCLES) info.setText(InstaCountUtils.SetInfoMessage());
                 }
             }
         });
@@ -306,20 +302,20 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
     public void onPause() {
         super.onPause();
         if (mOpenCvCameraView != null) mOpenCvCameraView.disableView();
-        InstaCountUtils.SaveSharedPreferences(this);
+        InstaCountUtils.SaveSharedPreferences(CameraRTDetectActivity.this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         if (mOpenCvCameraView != null) mOpenCvCameraView.disableView();
-        InstaCountUtils.SaveSharedPreferences(this);
+        InstaCountUtils.SaveSharedPreferences(CameraRTDetectActivity.this);
     }
 
     public void onDestroy() {
         super.onDestroy();
         if (mOpenCvCameraView != null) mOpenCvCameraView.disableView();
-        InstaCountUtils.SaveSharedPreferences(this);
+        InstaCountUtils.SaveSharedPreferences(CameraRTDetectActivity.this);
     }
 
     @Override
@@ -353,9 +349,6 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
 
     @Override
     public Mat onCameraFrame(Mat inputFrame) {
-        // start the timing counter to put the framerate on screen
-        // and make sure the start time is up to date, do
-        // a reset every 10 seconds
         if (lMilliStart == 0) lMilliStart = System.currentTimeMillis();
         if ((lMilliNow - lMilliStart) > 10000) {
             lMilliStart = System.currentTimeMillis();
@@ -376,7 +369,6 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
                 break;
             case VIEW_MODE_HOUGHCIRCLES:
                 Imgproc.cvtColor(InstaCountUtils.mRgba, InstaCountUtils.mGray, Imgproc.COLOR_RGBA2GRAY);
-
                 Imgproc.GaussianBlur(InstaCountUtils.mGray, InstaCountUtils.mGray, new Size(InstaCountUtils.blurSize, InstaCountUtils.blurSize), 2, 2);
                 Imgproc.HoughCircles(InstaCountUtils.mGray, InstaCountUtils.mIntermediateMat, Imgproc.CV_HOUGH_GRADIENT, 1.0, InstaCountUtils.minDistance, InstaCountUtils.cannyThreshold, InstaCountUtils.accumulatorThreshold, InstaCountUtils.minRadius, InstaCountUtils.maxRadius);
                 InstaCountUtils.mCircleCount = InstaCountUtils.mIntermediateMat.cols() > 50 ? 50 : InstaCountUtils.mIntermediateMat.cols();
@@ -408,32 +400,17 @@ public class CameraRTDetectFragment extends Activity implements CvCameraViewList
                 break;
         }
         
-        // get the time now in every frame
         lMilliNow = System.currentTimeMillis();
-        // update the frame counter
         lFrameCount++;
         title = String.format("FPS: %2.1f", (float) (lFrameCount * 1000) / (float) (lMilliNow - lMilliStart));
         ShowTitle(title, 2, colorGreen);
         if (bShootNow) {
-            // get the time of the attempt to save a screenshot
             lMilliShotTime = System.currentTimeMillis();
             bShootNow = false;
-            // try it, and set the screen text accordingly.
-            // this text is shown at the end of each frame until 
-            // 1.5 seconds has elapsed
-
-//            if (SaveImage(InstaCountUtils.mRgba)) {
-//                sShotText = "SCREENSHOT SAVED";
-//            }
-//            else {
-//                sShotText = "SCREENSHOT FAILED";
-//            }
             sShotText = SaveImage(InstaCountUtils.mRgba);
-
-            Intent myIntent = new Intent(CameraRTDetectFragment.this, CropActivity.class);
+            Intent myIntent = new Intent(CameraRTDetectActivity.this, CropActivity.class);
             myIntent.putExtra("filepath", sShotText);
-            CameraRTDetectFragment.this.startActivity(myIntent);
-
+            CameraRTDetectActivity.this.startActivity(myIntent);
             finish();
         }
         if (System.currentTimeMillis() - lMilliShotTime < 1500) ShowTitle(sShotText, 3, colorRed);

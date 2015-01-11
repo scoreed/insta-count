@@ -49,7 +49,7 @@ public class InstaCountMainActivity extends ActionBarActivity implements Navigat
                 break;
             case 2:
                 mTitle = getString(R.string.title_section3);
-                Intent myIntent = new Intent(InstaCountMainActivity.this, CameraRTDetectFragment.class);
+                Intent myIntent = new Intent(InstaCountMainActivity.this, CameraRTDetectActivity.class);
                 InstaCountMainActivity.this.startActivity(myIntent);
                 break;
             case 3:
